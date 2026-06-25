@@ -82,6 +82,18 @@ export async function generateFileHash(file) {
 }
 
 /**
+ * Torna timestamps [M:SS] / [MM:SS] / [H:MM:SS] clicáveis no laudo.
+ * Ao clicar, chama window.seekTo() que pula para o momento no vídeo/áudio.
+ * @param {string} html - HTML já renderizado (ex.: saída do marked.parse)
+ * @returns {string} HTML com os timestamps envoltos em <a class="timestamp-link">
+ */
+export function linkifyTimestamps(html) {
+    if (!html) return html;
+    return html.replace(/\[(\d{1,3}:\d{2}(?::\d{2})?)\]/g,
+        (_m, t) => `<a href="#" class="timestamp-link" onclick="seekTo('${t}'); return false;">[${t}]</a>`);
+}
+
+/**
  * Obtém a duração de um arquivo de mídia (áudio ou vídeo)
  * @param {File} file - Arquivo de mídia
  * @returns {Promise<string>} Duração formatada (MM:SS ou HH:MM:SS)

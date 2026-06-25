@@ -22,8 +22,8 @@
     background: var(--bg-card);
     border-radius: 12px;
     width: 100%;
-    max-width: 900px;
-    max-height: 85vh;
+    max-width: 1150px;
+    max-height: 92vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
@@ -87,7 +87,7 @@
     overflow-y: auto;
     padding: 20px 24px;
     min-height: 0;
-    max-height: calc(85vh - 140px);
+    max-height: calc(92vh - 140px);
     /* Header + Footer */
 }
 

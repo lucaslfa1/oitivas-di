@@ -41,12 +41,15 @@ public class AzureOpenAIService
 
     /// <summary>
     /// Gera conteúdo usando GPT-4o com múltiplas imagens (ex.: keyframes extraídos de vídeo).
+    /// Se <paramref name="captions"/> for fornecido, cada legenda é inserida como texto antes
+    /// da imagem correspondente (ex.: o timestamp do quadro), para ancorar a análise no tempo.
     /// </summary>
     public async Task<string> GenerateVisionAsync(
         string prompt,
         string systemPrompt,
         List<(string Base64, string MimeType)> images,
-        int maxTokens = 8192)
+        int maxTokens = 8192,
+        List<string>? captions = null)
     {
         if (!IsConfigured)
             throw new InvalidOperationException("Azure OpenAI não está configurado.");
@@ -63,8 +66,14 @@ public class AzureOpenAIService
         if (images.Count > 0)
         {
             var content = new List<object> { new { type = "text", text = prompt } };
-            foreach (var (base64, mime) in images)
+            for (int i = 0; i < images.Count; i++)
             {
+                if (captions != null && i < captions.Count && !string.IsNullOrEmpty(captions[i]))
+                {
+                    content.Add(new { type = "text", text = captions[i] });
+                }
+
+                var (base64, mime) = images[i];
                 var mimeReal = string.IsNullOrEmpty(mime) ? "image/jpeg" : mime;
                 content.Add(new { type = "image_url", image_url = new { url = $"data:{mimeReal};base64,{base64}" } });
             }

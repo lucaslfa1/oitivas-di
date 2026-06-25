@@ -380,10 +380,16 @@
                         <div class="card result-card">
                             <div class="result-header">
                                 <h3>Laudo Pericial</h3>
-                                <button onclick="toggleEditFoto()" class="btn-icon hidden" title="Editar"
-                                    id="btnEditFoto">
-                                    <i data-lucide="edit-3"></i>
-                                </button>
+                                <div class="result-header-actions">
+                                    <button onclick="maximizarLaudo('foto')" class="btn-icon" title="Maximizar laudo"
+                                        id="btnMaxFoto">
+                                        <i data-lucide="maximize-2"></i>
+                                    </button>
+                                    <button onclick="toggleEditFoto()" class="btn-icon hidden" title="Editar"
+                                        id="btnEditFoto">
+                                        <i data-lucide="edit-3"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div id="fotoViewArea">
                                 <div id="outputFoto" class="markdown-body">
@@ -449,10 +455,16 @@
                         <div class="card result-card">
                             <div class="result-header">
                                 <h3>Laudo Pericial</h3>
-                                <button onclick="toggleEditVideo()" class="btn-icon hidden" title="Editar"
-                                    id="btnEditVideo">
-                                    <i data-lucide="edit-3"></i>
-                                </button>
+                                <div class="result-header-actions">
+                                    <button onclick="maximizarLaudo('video')" class="btn-icon" title="Maximizar laudo"
+                                        id="btnMaxVideo">
+                                        <i data-lucide="maximize-2"></i>
+                                    </button>
+                                    <button onclick="toggleEditVideo()" class="btn-icon hidden" title="Editar"
+                                        id="btnEditVideo">
+                                        <i data-lucide="edit-3"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div id="videoViewArea" class="video-result-scroll">
                                 <div id="outputVideo" class="markdown-body">
@@ -602,7 +614,7 @@
     <!-- SignalR -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <!-- App Scripts -->
-    <script type="module" src="js/app.js?v=49"></script>
+    <script type="module" src="js/app.js?v=53"></script>
 
     <script>
         // Auth Check & UI Initialization

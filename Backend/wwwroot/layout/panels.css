@@ -554,6 +554,35 @@
     flex-wrap: wrap;
 }
 
+/* Agrupa os botões de ação no header do laudo (Maximizar + Editar) */
+.result-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Timestamps clicáveis no laudo (pulam no player via seekTo) */
+.timestamp-link {
+    color: var(--primary);
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.82em;
+    font-weight: 700;
+    text-decoration: none;
+    background: var(--bg-main);
+    padding: 1px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+}
+
+.timestamp-link:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
 /* ============================================
    PREVIEWS
    ============================================ */

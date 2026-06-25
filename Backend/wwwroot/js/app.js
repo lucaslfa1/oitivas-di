@@ -12,14 +12,14 @@
 
 // Core
 import { initTheme } from './core/theme.js';
-import { refreshIcons } from './core/utils.js';
+import { refreshIcons, linkifyTimestamps } from './core/utils.js';
 import { clearDrafts } from './core/drafts.js';
-import { setLaudo, setTranscricao, setTranscricaoValidada } from './core/state.js';
+import { setLaudo, setTranscricao, setTranscricaoValidada, getLaudo } from './core/state.js';
 
 // UI
 import { initUploads, clearFile } from './ui/upload.js';
 import { setMode, setOnSalvosOpen } from './ui/navigation.js';
-import { initModal, fecharModalTranscricao, fecharModalOverlay } from './ui/modal.js';
+import { initModal, fecharModalTranscricao, fecharModalOverlay, abrirModalTranscricao } from './ui/modal.js';
 import { initUser } from './ui/user.js';
 import { toast } from './ui/toast.js';
 
@@ -205,6 +205,14 @@ import { seekTo } from './ui/player.js';
 
 // Player Sync
 window.seekTo = seekTo;
+
+// Maximizar laudo num modal grande (mais espaço para leitura)
+window.maximizarLaudo = (tipo) => {
+  const md = getLaudo(tipo);
+  if (!md) { toast.warning('Nenhum laudo para exibir ainda.'); return; }
+  const html = (typeof marked !== 'undefined') ? marked.parse(md) : `<pre>${md}</pre>`;
+  abrirModalTranscricao(linkifyTimestamps(html), '<i data-lucide="maximize-2"></i> Laudo Pericial');
+};
 
 // Arquivos Salvos - Visualização Inline e Edição
 window.toggleEditSalvo = toggleEditSalvo;

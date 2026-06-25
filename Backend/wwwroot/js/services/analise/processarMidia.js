@@ -4,7 +4,7 @@
 
 import { enviarParaAnalise } from '../../api/sinistroApi.js?v=3';
 import { getFile, setLaudo } from '../../core/state.js';
-import { capitalize, refreshIcons, getMediaDuration } from '../../core/utils.js';
+import { capitalize, refreshIcons, getMediaDuration, linkifyTimestamps } from '../../core/utils.js';
 import { getLoaderHTML, getErrorHTML } from '../../ui/modal.js';
 import { toast } from '../../ui/toast.js';
 import { saveDraft } from '../../core/drafts.js';
@@ -49,8 +49,13 @@ export async function processar(tipo) {
     }
 
     if (output) {
-      if (typeof marked !== 'undefined') output.innerHTML = marked.parse(markdown);
-      else output.innerHTML = `<pre>${markdown}</pre>`;
+      if (typeof marked !== 'undefined') {
+        let html = marked.parse(markdown);
+        if (tipo === 'video') html = linkifyTimestamps(html);
+        output.innerHTML = html;
+      } else {
+        output.innerHTML = `<pre>${markdown}</pre>`;
+      }
     }
 
     const actions = document.getElementById(`actions${capitalize(tipo)}`);

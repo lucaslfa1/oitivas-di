@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.Options;
 using SinistroAPI.Configuration;
 
@@ -60,9 +61,70 @@ public class VideoAnaliseService
         _logger.LogInformation("Analisando {Count} keyframes via Azure OpenAI (GPT-4o Vision)...", keyframes.Count);
 
         var imagens = keyframes.Select(k => (Base64: k, MimeType: "image/jpeg")).ToList();
-        var prompt = $"{GetVideoPrompt(duracao)}\n\nCONTEXTO DO USUÁRIO: {contextoUsuario}";
 
-        return await _azureOpenAI.GenerateVisionAsync(prompt, "", imagens);
+        // Timestamp aproximado de cada keyframe (amostragem uniforme do vídeo) para ancorar a análise no tempo.
+        var duracaoSeg = ParseDuracaoSegundos(duracao);
+        var captions = BuildKeyframeCaptions(keyframes.Count, duracaoSeg);
+        var prompt = $"{GetVideoPrompt(duracao)}{BuildTimestampInstruction(duracaoSeg)}\n\nCONTEXTO DO USUÁRIO: {contextoUsuario}";
+
+        return await _azureOpenAI.GenerateVisionAsync(prompt, "", imagens, captions: captions);
+    }
+
+    /// <summary>Converte "H:MM:SS", "M:SS" ou um número de segundos em total de segundos. Retorna 0 se desconhecido.</summary>
+    private static double ParseDuracaoSegundos(string duracao)
+    {
+        if (string.IsNullOrWhiteSpace(duracao)) return 0;
+        duracao = duracao.Trim();
+        var partes = duracao.Split(':');
+        try
+        {
+            if (partes.Length == 3)
+                return int.Parse(partes[0]) * 3600 + int.Parse(partes[1]) * 60 + double.Parse(partes[2], CultureInfo.InvariantCulture);
+            if (partes.Length == 2)
+                return int.Parse(partes[0]) * 60 + double.Parse(partes[1], CultureInfo.InvariantCulture);
+            if (double.TryParse(duracao, NumberStyles.Any, CultureInfo.InvariantCulture, out var seg))
+                return seg;
+        }
+        catch { /* formato não numérico (ex.: "Não determinada") — segue sem timestamps */ }
+        return 0;
+    }
+
+    /// <summary>Formata segundos em [M:SS] ou [H:MM:SS].</summary>
+    private static string FormatTimestamp(double totalSegundos)
+    {
+        var t = TimeSpan.FromSeconds(Math.Max(0, totalSegundos));
+        return t.TotalHours >= 1
+            ? $"{(int)t.TotalHours}:{t.Minutes:D2}:{t.Seconds:D2}"
+            : $"{(int)t.TotalMinutes}:{t.Seconds:D2}";
+    }
+
+    /// <summary>Legenda de cada quadro com seu momento aproximado (amostragem uniforme).</summary>
+    private static List<string> BuildKeyframeCaptions(int total, double duracaoSeg)
+    {
+        var captions = new List<string>(total);
+        for (int i = 0; i < total; i++)
+        {
+            if (duracaoSeg > 0)
+            {
+                var t = total > 1 ? (double)i * duracaoSeg / (total - 1) : 0;
+                captions.Add($"Quadro {i + 1}/{total} — momento aproximado [{FormatTimestamp(t)}] do vídeo:");
+            }
+            else
+            {
+                captions.Add($"Quadro {i + 1}/{total}:");
+            }
+        }
+        return captions;
+    }
+
+    /// <summary>Instrução para o modelo ancorar cada observação ao timestamp do quadro correspondente.</summary>
+    private static string BuildTimestampInstruction(double duracaoSeg)
+    {
+        if (duracaoSeg <= 0) return "";
+        return "\n\nINSTRUÇÃO DE LINHA DO TEMPO:\n" +
+               "Os quadros abaixo foram extraídos em momentos específicos do vídeo (indicados antes de cada imagem como [MM:SS]). " +
+               "Para CADA evento, observação ou mudança relevante que descrever, INICIE a linha com o timestamp [MM:SS] do quadro em que aquilo aparece, " +
+               "usando exatamente o formato [MM:SS] entre colchetes — isso habilita a navegação clicável na linha do tempo do vídeo.";
     }
 
     /// <summary>
