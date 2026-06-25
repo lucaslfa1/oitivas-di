@@ -1,0 +1,519 @@
+/* ============================================
+   MODAL DE TRANSCRIÇÃO (CORES SÓBRIAS)
+   ============================================ */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--bg-card);
+}
+
+.modal-header h2 {
+    font-size: 1.2rem;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.modal-header h2 svg {
+    color: var(--primary);
+    width: 22px;
+    height: 22px;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--bg-main);
+    color: var(--danger);
+}
+
+.modal-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* CORPO DO MODAL - COM SCROLL */
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    min-height: 0;
+    max-height: calc(85vh - 140px);
+    /* Header + Footer */
+}
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--bg-card);
+    flex-wrap: wrap;
+}
+
+/* CORPO DA TRANSCRIÇÃO - CORES SÓBRIAS */
+.transcription-body {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-main);
+    padding: 16px;
+    background: var(--bg-main);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    min-height: 300px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.transcription-body p {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    border-left: 3px solid var(--border);
+}
+
+.transcription-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* Timestamps - Cor sóbria */
+.transcription-body .timestamp {
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-right: 8px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.8rem;
+    background: var(--bg-main);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Identificação dos interlocutores - Cores mais neutras */
+.transcription-body .speaker-operador {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.transcription-body .speaker-motorista {
+    color: var(--text-main);
+    font-weight: 600;
+    font-style: italic;
+}
+
+/* Tema escuro - ajustes sutis */
+[data-theme="dark"] .transcription-body .speaker-operador {
+    color: var(--primary);
+}
+
+[data-theme="dark"] .transcription-body .speaker-motorista {
+    color: #a3a3a3;
+}
+
+[data-theme="dark"] .transcription-body .timestamp {
+    background: var(--bg-card);
+}
+
+/* ============================================
+   LOADER ANIMADO PARA MODAL
+   ============================================ */
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    min-height: 300px;
+    gap: 25px;
+}
+
+/* Animação de ondas de áudio */
+.audio-wave-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 60px;
+}
+
+.audio-wave-loader .bar {
+    width: 6px;
+    height: 20px;
+    background: var(--primary);
+    border-radius: 3px;
+    animation: audioWave 1.2s ease-in-out infinite;
+}
+
+.audio-wave-loader .bar:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.audio-wave-loader .bar:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.audio-wave-loader .bar:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.audio-wave-loader .bar:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.audio-wave-loader .bar:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+.audio-wave-loader .bar:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+.audio-wave-loader .bar:nth-child(7) {
+    animation-delay: 0.2s;
+}
+
+.audio-wave-loader .bar:nth-child(8) {
+    animation-delay: 0.1s;
+}
+
+@keyframes audioWave {
+
+    0%,
+    100% {
+        height: 20px;
+        opacity: 0.5;
+    }
+
+    50% {
+        height: 50px;
+        opacity: 1;
+    }
+}
+
+/* Texto de loading */
+.loading-text {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.loading-text h4 {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.loading-text p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Barra de progresso indeterminada */
+.progress-bar-container {
+    width: 100%;
+    max-width: 300px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar-indeterminate {
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+    border-radius: 2px;
+    animation: progressIndeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes progressIndeterminate {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    50% {
+        transform: translateX(150%);
+    }
+
+    100% {
+        transform: translateX(350%);
+    }
+}
+
+/* Etapas do processamento */
+.loading-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.loading-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+    transition: 0.3s;
+}
+
+.loading-step.active {
+    opacity: 1;
+    color: var(--text-main);
+}
+
+.loading-step.done {
+    opacity: 1;
+    color: var(--success);
+}
+
+.loading-step svg {
+    width: 16px;
+    height: 16px;
+}
+
+.loading-step.active svg {
+    color: var(--primary);
+    animation: pulse 1s infinite;
+}
+
+.loading-step.done svg {
+    color: var(--success);
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ============================================
+   EDIÇÃO INLINE (TRANSCRIÇÃO E LAUDO)
+   ============================================ */
+
+/* Header do card com ações */
+.card-header-with-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.card-header-with-actions h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.card-actions .btn-icon {
+    padding: 6px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.card-actions .btn-icon:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.card-actions .btn-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Área de edição */
+.edit-area {
+    margin-top: 1rem;
+}
+
+.edit-textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 1rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    background: var(--bg-main);
+    color: var(--text-main);
+    resize: vertical;
+    outline: none;
+}
+
+.edit-textarea:focus {
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+}
+
+.edit-actions-inline {
+    display: flex;
+    gap: 8px;
+    margin-top: 0.75rem;
+    justify-content: flex-end;
+}
+
+/* Botões pequenos */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.btn-success:hover {
+    filter: brightness(1.1);
+}
+
+.btn-success svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Status de validação */
+.status-validacao {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid var(--success);
+    border-radius: 6px;
+    color: var(--success);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+.status-validacao svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Loading bar simples */
+.loading-bar-container {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.loading-bar-progress {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+    width: 30%;
+    animation: loadingBar 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingBar {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    50% {
+        transform: translateX(200%);
+    }
+
+    100% {
+        transform: translateX(400%);
+    }
+}
+
+/* Ajustes para o fluxo vertical no painel de áudio */
+#panel-audio .card {
+    margin-bottom: 1.5rem;
+}
+
+#panel-audio .card:last-child {
+    margin-bottom: 0;
+}
+
+/* Tema escuro */
+[data-theme="dark"] .edit-textarea {
+    background: var(--bg-card);
+}
+
+[data-theme="dark"] .status-validacao {
+    background: rgba(34, 197, 94, 0.15);
+}

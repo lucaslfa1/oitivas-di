@@ -1,0 +1,47 @@
+{
+    "Corrections": [
+        {
+            "Target": "Opentech",
+            "Patterns": [
+                "\\bUPN\\s*Tech\\b",
+                "\\bOPN\\s*Tech\\b",
+                "\\bOpen\\s+Tech\\b",
+                "\\bOpentec\\b",
+                "\\bOpenteck\\b",
+                "\\bOpemtech\\b",
+                "\\bHopemtech\\b",
+                "\\bOpontech\\b",
+                "\\bHopentech\\b",
+                "\\bOppentech\\b",
+                "\\bAlpecete\\b",
+                "\\bAlpesete\\b",
+                "\\bAlpecet\\b",
+                "\\bAlpe\\s*tech\\b",
+                "\\bOpem\\s*tech\\b"
+            ]
+        },
+        {
+            "Target": "CEAGESP",
+            "Patterns": [
+                "\\bGESP\\b",
+                "\\bCeagesp\\b",
+                "\\bCEAGESP\\b"
+            ]
+        },
+        {
+            "Target": "Base de Sinistros",
+            "Patterns": [
+                "Razio Sil[ií]cio",
+                "Base Silistros",
+                "Bas[ei] de [Ss]inistro"
+            ]
+        },
+        {
+            "Target": "boletim de ocorrência",
+            "Patterns": [
+                "boletim de ocorr[eê]ncia",
+                "beetim de ocorrência"
+            ]
+        }
+    ]
+}

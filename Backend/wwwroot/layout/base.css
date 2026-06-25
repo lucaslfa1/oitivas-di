@@ -1,0 +1,111 @@
+/* ============================================
+   ESTILOS BASE E RESET
+   Proporção Áurea aplicada (φ = 1.618)
+   ============================================ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+body {
+    background: var(--bg-main);
+    color: var(--text-main);
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* LAYOUT PRINCIPAL - Proporção Áurea (φ = 1.618) */
+/* Sidebar ~280px ≈ espaço menor, Conteúdo = restante (61.8% visual) */
+.app-container {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) 1fr;
+    height: 100vh;
+}
+
+/* MAIN WRAPPER & TOP BAR */
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: relative;
+}
+
+.top-bar {
+    position: absolute;
+    top: var(--phi-spacing-lg, 21px);
+    right: var(--phi-spacing-xl, 34px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: var(--phi-spacing-md, 13px);
+}
+
+/* CONTENT AREA - Espaçamentos Proporção Áurea */
+.content-area {
+    padding: var(--phi-spacing-xl, 34px);
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* ANIMAÇÕES */
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* UTILITÁRIOS */
+.hidden {
+    display: none !important;
+}
+
+.full-width {
+    width: 100%;
+}

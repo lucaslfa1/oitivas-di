@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Conversor de Áudio de Emergência</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .box {
+            border: 2px dashed #ccc;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        button:disabled {
+            background: #ccc;
+        }
+
+        #status {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Conversor MPEG -> WAV</h1>
+    <p>Use esta ferramenta para converter seu arquivo problemático para WAV limpo.</p>
+
+    <div style="margin-bottom: 1rem;">
+        <label for="apiUrl">API URL:</label>
+        <input type="text" id="apiUrl" value="http://localhost:8000" style="width: 300px;">
+    </div>
+
+    <input type="file" id="fileInput" accept="audio/*,video/*">
+
+    <div class="box">
+        <button id="convertBtn" onclick="converter()">Converter e Baixar WAV</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function converter() {
+            const fileInput = document.getElementById('fileInput');
+            const status = document.getElementById('status');
+            const btn = document.getElementById('convertBtn');
+            const apiUrl = document.getElementById('apiUrl').value.replace(/\/$/, ""); // Remove trailing slash
+
+            if (!fileInput.files[0]) {
+                alert('Selecione um arquivo!');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            status.innerText = "Enviando e convertendo... aguarde...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${apiUrl}/tools/convert-to-wav`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro do servidor: ${response.status} - ${await response.text()}`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name + ".wav";
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                status.innerText = "Sucesso! Download iniciado.";
+            } catch (e) {
+                status.innerText = "Erro: " + e.message;
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

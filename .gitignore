@@ -1,0 +1,55 @@
+# Build artifacts
+bin/
+obj/
+publish/
+publish_azure/
+publish_novo/
+
+# Deploy packages
+*.zip
+
+# IDE
+.vs/
+.vscode/
+
+# Logs
+*.log
+
+# Database
+*.db
+
+# Environment
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+
+# User Secrets
+secrets.json
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Backup de referência (local only)
+backup_referencia/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+
+# Test files
+test_audio.mp3
+*.test.mp3
+
+*.db-shm
+*.db-wal
+
+# Archived Modules
+chat/

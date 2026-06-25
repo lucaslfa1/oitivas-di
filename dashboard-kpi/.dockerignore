@@ -1,0 +1,7 @@
+__pycache__
+*.pyc
+.git
+.gitignore
+check_*.py
+test_*.py
+originais/

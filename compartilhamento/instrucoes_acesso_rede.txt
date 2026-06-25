@@ -1,0 +1,24 @@
+﻿INSTRUÇÕES PARA COMPARTILHAR O PROJETO NA REDE LOCAL (SENTINEL)
+------------------------------------------------------------
+
+Seu IP atual na rede: 172.16.138.111
+Porta do Servidor: 5252
+
+COMO LIBERAR PARA OUTROS USUÁRIOS:
+Como você não tem permissão de administrador, peça para o TI ou alguém com acesso ADM seguir estes passos no seu computador:
+
+1. Abrir 'Firewall do Windows com Segurança Avançada'.
+2. Clicar em 'Regras de Entrada' (lado esquerdo).
+3. Clicar em 'Nova Regra...' (lado direito).
+4. Selecionar 'Porta' > Avançar.
+5. Selecionar 'TCP' e em 'Portas locais específicas' digitar: 5252 > Avançar.
+6. Selecionar 'Permitir a conexão' > Avançar.
+7. Marcar as 3 opções (Domínio, Privado, Público) > Avançar.
+8. Nomear como: "Acesso Sentinel - Porta 5252" > Concluir.
+
+LINK PARA OS COLEGAS ACESSAREM:
+http://172.16.138.111:5252/index.html
+
+OBSERVAÇÃO:
+O servidor deve estar rodando com o comando:
+dotnet run --project Backend/SinistroAPI.csproj --urls "http://0.0.0.0:5252"

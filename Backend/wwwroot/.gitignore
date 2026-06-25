@@ -1,0 +1,19 @@
+# Build artifacts
+bin/
+obj/
+publish/
+publish_azure/
+publish_novo/
+
+# Deploy packages
+*.zip
+
+# IDE
+.vs/
+.vscode/
+
+# Logs
+*.log
+
+# Environment
+appsettings.Development.json

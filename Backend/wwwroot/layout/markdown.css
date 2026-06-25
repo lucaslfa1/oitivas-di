@@ -1,0 +1,76 @@
+/* ============================================
+   MARKDOWN E RESULTADO
+   ============================================ */
+
+.markdown-body {
+    overflow-y: auto;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-main);
+    padding-right: 10px;
+    flex: 1;
+    min-height: 0;
+}
+
+.markdown-body h1 {
+    font-size: 1.4rem;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-top: 0;
+}
+
+.markdown-body h2 {
+    font-size: 1.2rem;
+    color: var(--text-main);
+    margin-top: 25px;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.markdown-body ul {
+    padding-left: 20px;
+    color: var(--text-muted);
+}
+
+.markdown-body strong {
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 0.9rem;
+}
+
+.markdown-body th,
+.markdown-body td {
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: left;
+}
+
+.markdown-body th {
+    background: var(--bg-main);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.markdown-body tr:nth-child(even) {
+    background: var(--bg-main);
+}
+
+/* Timestamps */
+.timestamp-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: bold;
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+.timestamp-link:hover {
+    text-decoration: underline;
+}

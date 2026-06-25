@@ -1,0 +1,27 @@
+flowchart TD
+  A["Usuario acessa Sentinel"] --> B{"Escolhe fluxo"}
+  B --> C["Audio ou merge de audio"]
+  B --> D["Foto de vistoria"]
+  B --> E["Video de sinistro"]
+  B --> F["Analises salvas"]
+  C --> C1["POST /api/transcrever"]
+  C1 --> C2["Azure Speech-to-Text"]
+  C2 --> C3{"Transcricao valida?"}
+  C3 -->|Nao| C4["Fallback Azure Whisper"]
+  C3 -->|Sim| C5["Transcricao formatada"]
+  C4 --> C5
+  C5 --> C6["POST /api/analisar/laudo"]
+  C6 --> C7["Azure OpenAI gera laudo"]
+  D --> D1["POST /api/analisar/imagem"]
+  D1 --> D2["Provider vision gera laudo"]
+  E --> E1["POST /api/analisar/video"]
+  E1 --> E2["Vertex inline ou Gemini File API"]
+  F --> F1["GET /api/analises"]
+  C7 --> G["Revisao humana"]
+  D2 --> G
+  E2 --> G
+  F1 --> G
+  G --> H{"Salvar?"}
+  H -->|Sim| I["POST /api/salvar"]
+  H -->|Nao| J["Exportar ou copiar"]
+  I --> K["SQLite"]

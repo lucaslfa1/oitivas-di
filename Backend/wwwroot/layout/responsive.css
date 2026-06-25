@@ -1,0 +1,439 @@
+/* ============================================
+   RESPONSIVIDADE COMPLETA - Sentinel
+   ============================================ */
+
+/* ============================================
+   HAMBURGER MENU BUTTON (Mobile Only)
+   ============================================ */
+.hamburger-btn {
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.hamburger-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.hamburger-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* ============================================
+   OVERLAY (Mobile Sidebar Background)
+   ============================================ */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ============================================
+   TELAS GRANDES (Desktop > 900px)
+   ============================================ */
+@media (min-width: 901px) {
+    .hamburger-btn {
+        display: none !important;
+    }
+
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   TELAS MÉDIAS (Tablet: 701px - 900px)
+   ============================================ */
+@media (max-width: 900px) {
+    .split-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 16px;
+    }
+
+    .result-card {
+        min-height: 50vh;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    .panel-header {
+        margin-bottom: 16px;
+    }
+}
+
+/* ============================================
+   MOBILE (< 700px) - SIDEBAR DESLIZANTE
+   ============================================ */
+@media (max-width: 700px) {
+
+    /* Layout Principal */
+    .app-container {
+        grid-template-columns: 1fr;
+        position: relative;
+    }
+
+    /* Hamburger Button - Visível */
+    .hamburger-btn {
+        display: flex;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+    }
+
+    /* Sidebar Mobile - Off-canvas */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+        overflow-y: auto;
+        /* Garante scroll se conteúdo for maior que a tela */
+    }
+
+    .sidebar.open {
+        transform: translateX(280px);
+    }
+
+    /* Overlay Ativo */
+    .sidebar-overlay {
+        display: none;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    /* Content Area Adjustments */
+    .content-area {
+        padding: 15px;
+        padding-top: 75px;
+    }
+
+    /* Top Bar Adjustments */
+    .top-bar {
+        left: 70px;
+        right: 15px;
+    }
+
+    /* Cards */
+    .card {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    .card h3 {
+        font-size: 0.9rem;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+        min-height: 150px;
+        padding: 20px 12px;
+    }
+
+    .drop-zone p {
+        font-size: 0.85rem;
+    }
+
+    .icon-lg {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Panel Headers */
+    .panel-header {
+        margin-bottom: 14px;
+    }
+
+    .panel-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .panel-header p {
+        font-size: 0.85rem;
+    }
+
+    /* Result Actions */
+    .result-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    /* Buttons */
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+
+    .btn-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    /* Textareas */
+    textarea {
+        font-size: 16px !important;
+        /* Previne zoom no iOS */
+        min-height: 100px;
+    }
+
+    /* Modal responsivo */
+    .modal-content {
+        max-height: 90vh;
+        border-radius: 12px;
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 14px;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .modal-footer .btn-secondary,
+    .modal-footer .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Arquivos salvos responsivo */
+    .saved-file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .saved-file-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .saved-files-panel {
+        padding: 14px;
+    }
+
+    .saved-files-filters {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .filter-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    /* Media Preview */
+    .media-preview-box {
+        padding: 10px;
+    }
+
+    .file-name {
+        max-width: 150px;
+    }
+
+    /* Result sections */
+    .result-section {
+        padding: 12px;
+    }
+
+    .result-header h4 {
+        font-size: 0.9rem;
+    }
+
+    /* Edit area */
+    .edit-textarea {
+        min-height: 100px;
+    }
+
+    .edit-actions-inline {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .edit-actions-inline button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Empty state */
+    .empty-state {
+        min-height: 200px;
+        padding: 20px;
+    }
+
+    .empty-state svg {
+        width: 40px;
+        height: 40px;
+    }
+
+    .empty-state p {
+        font-size: 0.9rem;
+    }
+
+    /* Markdown body */
+    .markdown-body {
+        max-height: 400px;
+    }
+}
+
+/* ============================================
+   MOBILE PEQUENO (< 480px)
+   ============================================ */
+@media (max-width: 480px) {
+
+    /* Theme button - ícone apenas */
+    .theme-switch-btn span {
+        display: none;
+    }
+
+    .theme-switch-btn {
+        padding: 8px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+
+    /* Content area menor padding */
+    .content-area {
+        padding: 10px;
+        padding-top: 70px;
+    }
+
+    /* Cards ainda menores */
+    .card {
+        padding: 12px;
+    }
+
+    /* Filters centralizados */
+    .saved-files-filters {
+        justify-content: center;
+    }
+
+    /* Panel header */
+    .panel-header h2 {
+        font-size: 1.1rem;
+    }
+
+    /* Drop zone compacta */
+    .drop-zone {
+        min-height: 120px;
+        padding: 16px 10px;
+    }
+
+    /* Menu items no sidebar */
+    .menu-item {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    /* Brand compacto */
+    .project-name {
+        font-size: 1.1rem;
+    }
+
+    .project-tagline {
+        font-size: 0.5rem;
+    }
+
+    /* Menu scroll no mobile */
+    .menu {
+        overflow-y: auto;
+        max-height: calc(100vh - 280px);
+        /* Deixa espaço para brand e user-profile */
+    }
+}
+
+/* ============================================
+   PAISAGEM EM MOBILE
+   ============================================ */
+@media (max-width: 700px) and (orientation: landscape) {
+    .split-layout {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+    }
+
+    .input-card,
+    .result-card {
+        flex: 1;
+        max-height: 70vh;
+    }
+
+    .drop-zone {
+        min-height: 100px;
+    }
+}
+
+/* ============================================
+   ACESSIBILIDADE - MOVIMENTO REDUZIDO
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    .sidebar {
+        transition: none;
+    }
+}
+
+/* ============================================
+   DARK MODE MOBILE SPECIFICS
+   ============================================ */
+@media (max-width: 700px) {
+    [data-theme="dark"] .sidebar-overlay.active {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    [data-theme="dark"] .sidebar.open {
+        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.4);
+    }
+}

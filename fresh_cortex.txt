@@ -1,0 +1,20 @@
+2026-04-04T18:20:40.326328Z	INFO:     169.254.169.126:48440 - "POST /process/audio HTTP/1.1" 500 Internal Server Error
+2026-04-04T18:20:40.325828Z	2026-04-04 18:20:40 | ERROR | sentinel | [SENTINEL] Erro ao processar ?udio: name 'start_trim' is not defined
+2026-04-04T18:20:35.648433Z	2026-04-04 18:20:35 | INFO | services.audio_processor | Carregando direto do disco: /tmp/tmpl226bi4s.wav
+2026-04-04T18:20:35.648332Z	2026-04-04 18:20:35 | INFO | services.audio_processor | Processando ?udio: audio.wav (audio/wav)
+2026-04-04T18:20:35.626389Z	2026-04-04 18:20:35 | INFO | sentinel | [SENTINEL] Processando ?udio: audio.wav (audio/wav)
+2026-04-04T18:20:35.568303Z	
+2026-04-04T18:19:02.538211Z	Response size was too large. Please consider reducing response size.
+2026-04-04T18:19:02.463737Z	INFO:     169.254.169.126:55036 - "POST /process/merge-audio HTTP/1.1" 200 OK
+2026-04-04T18:18:36.517651Z	2026-04-04 18:18:36 | INFO | services.audio_processor | Salvando tempor?rio como: temp.wav
+2026-04-04T18:18:36.517557Z	2026-04-04 18:18:36 | INFO | services.audio_processor | Carregando parte 2/2 (1609098 bytes, audio/wav)
+2026-04-04T18:18:34.085231Z	2026-04-04 18:18:34 | INFO | services.audio_processor | Salvando tempor?rio como: temp.wav
+2026-04-04T18:18:34.085182Z	2026-04-04 18:18:34 | INFO | services.audio_processor | Carregando parte 1/2 (14228378 bytes, audio/wav)
+2026-04-04T18:18:34.085108Z	2026-04-04 18:18:34 | INFO | services.audio_processor | Iniciando merge de 2 arquivos
+2026-04-04T18:18:34.036349Z	2026-04-04 18:18:34 | INFO | sentinel | [SENTINEL] Iniciando merge de 2 arquivos
+2026-04-04T18:18:33.881158Z	
+2026-04-04T18:11:49.215881Z	INFO:     169.254.169.126:29530 - "POST /process/merge-audio HTTP/1.1" 200 OK
+2026-04-04T18:11:48.993755Z	2026-04-04 18:11:48 | INFO | services.audio_processor | Salvando tempor?rio como: temp.wav
+2026-04-04T18:11:48.993654Z	2026-04-04 18:11:48 | INFO | services.audio_processor | Carregando parte 2/2 (88244 bytes, audio/wav)
+2026-04-04T18:11:48.990010Z	2026-04-04 18:11:48 | INFO | services.audio_processor | Salvando tempor?rio como: temp.wav
+2026-04-04T18:11:48.989936Z	2026-04-04 18:11:48 | INFO | services.audio_processor | Carregando parte 1/2 (88244 bytes, audio/wav)

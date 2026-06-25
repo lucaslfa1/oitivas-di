@@ -1,0 +1,70 @@
+/* Insights Box */
+.insights-box {
+    background: rgba(255, 165, 0, 0.05);
+    border: 1px solid rgba(255, 165, 0, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.5s ease;
+}
+
+.insights-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(255, 165, 0, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.insights-header h5 {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.8rem;
+}
+
+.insight-item {
+    background: var(--bg-card-lighter);
+    padding: 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.insight-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.insight-value {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.btn-icon-sm {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+}
+
+.btn-icon-sm:hover {
+    color: var(--text-color);
+}

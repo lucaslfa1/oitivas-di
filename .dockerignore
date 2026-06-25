@@ -1,0 +1,14 @@
+**/obj/
+**/bin/
+**/appsettings.Local.json
+**/appsettings.Development.json
+.git/
+.gitignore
+.vs/
+.vscode/
+deploy.ps1
+deploy_azure_old.ps1
+test_api.ps1
+test_api_validation.ps1
+*.sln
+*.user

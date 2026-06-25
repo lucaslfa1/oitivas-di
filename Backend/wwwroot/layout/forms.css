@@ -1,0 +1,29 @@
+/* ============================================
+   FORMULÁRIOS E INPUTS
+   ============================================ */
+
+label { 
+    font-size: clamp(0.8rem, 1vw, 0.9rem); 
+    font-weight: 600; 
+    color: var(--text-main); 
+    margin-bottom: 0.5rem; 
+    display: block; 
+}
+
+textarea { 
+    width: 100%; 
+    background: var(--input-bg); 
+    border: 1px solid var(--border); 
+    color: var(--text-main);
+    padding: clamp(8px, 1vw, 12px); 
+    border-radius: 8px; 
+    height: clamp(70px, 10vh, 100px); 
+    resize: none; 
+    margin-bottom: clamp(15px, 2vw, 20px);
+    font-size: clamp(0.85rem, 1vw, 0.95rem);
+}
+
+textarea:focus { 
+    outline: 2px solid var(--primary); 
+    border-color: transparent; 
+}

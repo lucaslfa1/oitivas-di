@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge de Áudio - Sentinel</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #333; margin-top: 0; }
+        .upload-area { border: 2px dashed #ccc; padding: 40px; text-align: center; border-radius: 8px; margin-bottom: 20px; transition: 0.3s; }
+        .upload-area:hover { border-color: #667eea; background: #f8faff; cursor: pointer; }
+        input[type="file"] { display: none; }
+        .btn { background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; }
+        .btn:hover { background: #5a6fd1; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        #fileList { list-style: none; padding: 0; margin-bottom: 20px; }
+        #fileList li { background: #f0f0f0; padding: 10px; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        #status { margin-top: 20px; font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sentinel - Juntar Áudios</h1>
+        <p>Selecione 2 ou mais arquivos de áudio para unir em um único arquivo de ligação.</p>
+        
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <p>Clique aqui para selecionar os arquivos ou arraste e solte</p>
+            <input type="file" id="fileInput" multiple accept="audio/*">
+        </div>
+
+        <ul id="fileList"></ul>
+
+        <button id="mergeBtn" class="btn" onclick="mergeAudios()" disabled>Juntar Áudios</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const mergeBtn = document.getElementById('mergeBtn');
+        const statusEl = document.getElementById('status');
+        let selectedFiles = [];
+
+        fileInput.addEventListener('change', (e) => {
+            const newFiles = Array.from(e.target.files);
+            selectedFiles = [...selectedFiles, ...newFiles];
+            updateList();
+        });
+
+        function updateList() {
+            fileList.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${file.name} (${(file.size/1024).toFixed(1)} KB)</span> 
+                                <span style="cursor:pointer;color:red" onclick="removeFile(${index})">✕</span>`;
+                fileList.appendChild(li);
+            });
+            mergeBtn.disabled = selectedFiles.length < 2;
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateList();
+        }
+
+        async function mergeAudios() {
+            if (selectedFiles.length < 2) return;
+
+            statusEl.textContent = "Enviando... aguarde.";
+            statusEl.className = "";
+            mergeBtn.disabled = true;
+
+            const formData = new FormData();
+            selectedFiles.forEach(file => {
+                formData.append("files", file);
+            });
+
+            try {
+                const response = await fetch('/api/tools/merge-audio', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "audio_completo_merged.wav";
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    statusEl.textContent = "Sucesso! O download começou automaticamente.";
+                    statusEl.className = "success";
+                } else {
+                    const err = await response.text();
+                    statusEl.textContent = "Erro: " + err;
+                    statusEl.className = "error";
+                }
+            } catch (error) {
+                statusEl.textContent = "Erro de conexão: " + error.message;
+                statusEl.className = "error";
+            } finally {
+                mergeBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Backend .NET (Sentinel)
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DB_PATH=/data/sinistros.db
+    volumes:
+      - ./data:/data
+    networks:
+      - sinistro-net
+
+  # Sentinel Cortex (Python Media Processor)
+  sentinel-cortex:
+    build:
+      context: ./sentinel-cortex
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    networks:
+      - sinistro-net
+
+  # Dashboard Python (KPIs)
+  dashboard:
+    build:
+      context: ./dashboard-kpi
+      dockerfile: Dockerfile
+    ports:
+      - "8051:8051"
+    environment:
+      - PORT=8051
+    networks:
+      - sinistro-net
+
+  # CallApp (React/Vite)
+  callapp:
+    build:
+      context: ./CallApp
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    networks:
+      - sinistro-net
+
+networks:
+  sinistro-net:
+    driver: bridge
