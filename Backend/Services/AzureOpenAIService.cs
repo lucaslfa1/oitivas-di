@@ -2,12 +2,12 @@ using Microsoft.Extensions.Options;
 using SinistroAPI.Configuration;
 using System.Text;
 using System.Text.Json;
-using System.Net.Http.Headers;
 
 namespace SinistroAPI.Services;
 
 /// <summary>
-/// Serviço para integração com Azure OpenAI (GPT-4o)
+/// Serviço para integração com Azure OpenAI (GPT-4o).
+/// Suporta texto, imagem única e múltiplas imagens (keyframes de vídeo).
 /// </summary>
 public class AzureOpenAIService
 {
@@ -28,9 +28,25 @@ public class AzureOpenAIService
     }
 
     /// <summary>
-    /// Gera conteúdo usando GPT-4o (Texto ou Imagem)
+    /// Gera conteúdo usando GPT-4o (texto ou imagem única).
     /// </summary>
-    public async Task<string> GenerateContentAsync(string prompt, string systemPrompt = "", string? base64Image = null)
+    public async Task<string> GenerateContentAsync(string prompt, string systemPrompt = "", string? base64Image = null, string mimeType = "image/jpeg")
+    {
+        var images = string.IsNullOrEmpty(base64Image)
+            ? new List<(string Base64, string MimeType)>()
+            : new List<(string Base64, string MimeType)> { (base64Image, mimeType) };
+
+        return await GenerateVisionAsync(prompt, systemPrompt, images);
+    }
+
+    /// <summary>
+    /// Gera conteúdo usando GPT-4o com múltiplas imagens (ex.: keyframes extraídos de vídeo).
+    /// </summary>
+    public async Task<string> GenerateVisionAsync(
+        string prompt,
+        string systemPrompt,
+        List<(string Base64, string MimeType)> images,
+        int maxTokens = 8192)
     {
         if (!IsConfigured)
             throw new InvalidOperationException("Azure OpenAI não está configurado.");
@@ -44,17 +60,15 @@ public class AzureOpenAIService
             messages.Add(new { role = "system", content = systemPrompt });
         }
 
-        if (!string.IsNullOrEmpty(base64Image))
+        if (images.Count > 0)
         {
-            messages.Add(new
+            var content = new List<object> { new { type = "text", text = prompt } };
+            foreach (var (base64, mime) in images)
             {
-                role = "user",
-                content = new object[]
-                {
-                    new { type = "text", text = prompt },
-                    new { type = "image_url", image_url = new { url = $"data:image/jpeg;base64,{base64Image}" } }
-                }
-            });
+                var mimeReal = string.IsNullOrEmpty(mime) ? "image/jpeg" : mime;
+                content.Add(new { type = "image_url", image_url = new { url = $"data:{mimeReal};base64,{base64}" } });
+            }
+            messages.Add(new { role = "user", content = content.ToArray() });
         }
         else
         {
@@ -64,7 +78,7 @@ public class AzureOpenAIService
         var payload = new
         {
             messages = messages,
-            max_tokens = 4096,
+            max_tokens = maxTokens,
             temperature = 0.0, // Alta precisão para laudos periciais
             top_p = 1
         };
@@ -73,7 +87,9 @@ public class AzureOpenAIService
         request.Headers.Add("api-key", _settings.ApiKey);
         request.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-        _logger.LogInformation("Enviando requisição para Azure OpenAI: {Deployment}", _settings.DeploymentName);
+        _logger.LogInformation(
+            "Enviando requisição para Azure OpenAI: {Deployment} ({ImageCount} imagem/imagens)",
+            _settings.DeploymentName, images.Count);
 
         var response = await _httpClient.SendAsync(request);
         var responseBody = await response.Content.ReadAsStringAsync();

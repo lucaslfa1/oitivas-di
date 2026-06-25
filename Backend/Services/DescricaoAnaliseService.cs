@@ -1,40 +1,25 @@
-using Google.Cloud.AIPlatform.V1;
-using Microsoft.Extensions.Options;
-using SinistroAPI.Configuration;
 using SinistroAPI.Interfaces;
 using System.Text;
-using System.Text.Json;
 
 namespace SinistroAPI.Services;
 
 /// <summary>
-/// Serviço especializado em análise de DESCRIÇÕES textuais de sinistros
-/// Útil para analisar boletins de ocorrência, relatos escritos, etc.
+/// Serviço especializado em análise de DESCRIÇÕES textuais de sinistros.
+/// Útil para analisar boletins de ocorrência, relatos escritos, etc. Utiliza Azure OpenAI (GPT-4o).
 /// </summary>
 public class DescricaoAnaliseService : IDescricaoAnaliseService
 {
-    private readonly HttpClient _httpClient;
-    private readonly string _geminiApiKey;
     private readonly ILogger<DescricaoAnaliseService> _logger;
-    private readonly VertexAIService _vertexAI;
     private readonly AzureOpenAIService _azureOpenAI;
-    private readonly VertexAISettings _vertexSettings;
-    private readonly string _reportModel;
 
-    public DescricaoAnaliseService(HttpClient httpClient, IConfiguration configuration, ILogger<DescricaoAnaliseService> logger, VertexAIService vertexAI, AzureOpenAIService azureOpenAI, IOptions<VertexAISettings> vertexSettings)
+    public DescricaoAnaliseService(ILogger<DescricaoAnaliseService> logger, AzureOpenAIService azureOpenAI)
     {
-        _httpClient = httpClient;
-        _httpClient.Timeout = TimeSpan.FromMinutes(5);
-        _geminiApiKey = configuration["GEMINI_API_KEY"] ?? "";
         _logger = logger;
-        _vertexAI = vertexAI;
         _azureOpenAI = azureOpenAI;
-        _vertexSettings = vertexSettings.Value;
-        _reportModel = _vertexSettings.Models.ReportGeneration ?? "gemini-1.5-pro";
     }
 
     /// <summary>
-    /// Verifica se o serviço está configurado (Azure, Gemini ou Vertex AI)
+    /// Verifica se o serviço está configurado (Azure OpenAI)
     /// </summary>
     public bool IsConfigured => _azureOpenAI.IsConfigured;
 
@@ -106,24 +91,7 @@ public class DescricaoAnaliseService : IDescricaoAnaliseService
         return await _azureOpenAI.GenerateContentAsync($"{prompt}\n\nCONTEXTO ADICIONAL: {contextoUsuario}", GetSystemPrompt());
     }
 
-    #region Gemini (Fallback)
-
-    private async Task<string> AnalisarComGemini(string descricao, string tipoDocumento, string contextoUsuario)
-    {
-        var prompt = GetPromptAnaliseDescricao(descricao, tipoDocumento);
-        return await EnviarParaGemini(prompt, contextoUsuario);
-    }    
-
-    private async Task<string> AnalisarOitivaComGemini(string transcricao, string duracao, string contextoUsuario, string tipoOperacao)
-    {
-        var prompt = GetPromptAnaliseOitiva(transcricao, duracao, tipoOperacao);
-        var contextoReforçado = GetContextoReforcadoAntiAlucinacao(contextoUsuario);
-        
-        var resultado = await EnviarParaGemini(prompt, contextoReforçado);
-        
-        // Pós-processar para corrigir possíveis inversões de interlocutores
-        return PosProcessarTranscricao(resultado);
-    }
+    #region Helpers
 
     /// <summary>
     /// Corrige possíveis erros na transcrição formatada
@@ -144,7 +112,7 @@ public class DescricaoAnaliseService : IDescricaoAnaliseService
         resultado = resultado.Replace("**Vítima:**", "**Motorista:**");
         resultado = resultado.Replace("**Declarante:**", "**Motorista:**");
         resultado = resultado.Replace("**Condutor:**", "**Motorista:**");
-        
+
         return resultado;
     }
 
@@ -154,52 +122,9 @@ public class DescricaoAnaliseService : IDescricaoAnaliseService
     private string GetContextoReforcadoAntiAlucinacao(string contextoUsuario)
     {
         // Contexto simples - a regra anti-alucinação já está no prompt principal
-        return string.IsNullOrWhiteSpace(contextoUsuario) 
-            ? "Nenhum contexto adicional fornecido." 
+        return string.IsNullOrWhiteSpace(contextoUsuario)
+            ? "Nenhum contexto adicional fornecido."
             : contextoUsuario;
-    }
-
-    private async Task<string> EnviarParaGemini(string prompt, string contextoUsuario)
-    {
-        var payload = new
-        {
-            contents = new object[]
-            {
-                new {
-                    role = "user",
-                    parts = new object[]
-                    {
-                        new { text = $"{GetSystemPrompt()}\n\n{prompt}\n\nCONTEXTO ADICIONAL: {contextoUsuario}" }
-                    }
-                }
-            },
-            generationConfig = new
-            {
-                temperature = 0.0,  // ZERO para máxima precisão e mínima alucinação
-                maxOutputTokens = 8192
-            }
-        };
-
-        var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        // Usa modelo configurado com temperatura 0.0 para máxima precisão
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{_reportModel}:generateContent?key={_geminiApiKey}";
-        
-        var resposta = await _httpClient.PostAsync(url, jsonContent);
-
-        if (!resposta.IsSuccessStatusCode)
-        {
-            var erro = await resposta.Content.ReadAsStringAsync();
-            throw new Exception($"Erro Gemini ({resposta.StatusCode}): {erro}");
-        }
-
-        var respostaString = await resposta.Content.ReadAsStringAsync();
-        using var doc = JsonDocument.Parse(respostaString);
-        
-        return doc.RootElement.GetProperty("candidates")[0]
-                              .GetProperty("content")
-                              .GetProperty("parts")[0]
-                              .GetProperty("text")
-                              .GetString() ?? "Sem resposta.";
     }
 
     #endregion
@@ -298,7 +223,7 @@ DOCUMENTO ({tipoDocumento}):
     {
         // Usa o novo prompt "Detetive" definido em SinistroPrompts
         var promptBase = SinistroAPI.Prompts.SinistroPrompts.GetPromptAnaliseOitivaDetetive(duracao);
-        
+
         return $@"{promptBase}
 
 INSTRUÇÃO ADICIONAL:
@@ -345,7 +270,7 @@ TRANSCRIÇÃO PARA ANÁLISE:
 | Aspecto | Relato 1 diz | Relato 2 diz |
 |---------|--------------|--------------|
 
-# 2. DIVERGÊNCIAS  
+# 2. DIVERGÊNCIAS
 | Aspecto | Relato 1 diz | Relato 2 diz |
 |---------|--------------|--------------|
 

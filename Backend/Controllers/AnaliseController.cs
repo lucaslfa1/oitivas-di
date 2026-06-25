@@ -82,7 +82,7 @@ public class AnaliseController : ControllerBase
         {
             if (!_videoService.IsConfigured)
             {
-                return BadRequest(new ErrorResponse("Serviço de vídeo não configurado. Verifique GEMINI_API_KEY."));
+                return BadRequest(new ErrorResponse("Serviço de vídeo não configurado (Azure OpenAI)."));
             }
 
             _logger.LogInformation("Analisando vídeo: {Size} MB", dados.Arquivo.Length / 1024.0 / 1024.0);

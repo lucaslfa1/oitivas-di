@@ -1,12 +1,11 @@
 // Sentinel - Sistema de Análise Forense de Sinistros Veiculares
-// Transcrição: Gemini | Laudo: Gemini / Vertex AI
+// Transcrição: Azure Speech/Whisper | Laudo e Visão: Azure OpenAI (GPT-4o)
 
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using SinistroAPI.Configuration;
 using SinistroAPI.Data;
 using SinistroAPI.Services;
-using SinistroAPI.Services.AI;
 using SinistroAPI.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,7 +34,6 @@ builder.Services.Configure<FormOptions>(x => {
     x.MultipartBodyLengthLimit = uploadLimits.MaxRequestBodyBytes;
 });
 
-builder.Services.Configure<VertexAISettings>(builder.Configuration.GetSection(VertexAISettings.SectionName));
 builder.Services.Configure<PromptsOptions>(builder.Configuration);
 builder.Services.Configure<TextCorrectionsWrapper>(builder.Configuration);
 builder.Services.Configure<ResilienceOptions>(builder.Configuration.GetSection("Resilience"));
@@ -68,14 +66,10 @@ builder.Services.AddCors(options =>
 // --- CONTROLLERS ---
 builder.Services.AddControllers();
 
-// --- SERVIÇOS DE IA ---
-builder.Services.AddHttpClient<GeminiFileApiService>();
-
-builder.Services.AddHttpClient<ImagemAnaliseService>();
-builder.Services.AddHttpClient<VideoAnaliseService>();
-builder.Services.AddHttpClient<DescricaoAnaliseService>();
-builder.Services.AddHttpClient<VertexAIService>();
-builder.Services.AddHttpClient<GeminiProvider>();
+// --- SERVIÇOS DE IA (Azure OpenAI) ---
+builder.Services.AddScoped<ImagemAnaliseService>();
+builder.Services.AddScoped<VideoAnaliseService>();
+builder.Services.AddScoped<DescricaoAnaliseService>();
 builder.Services.AddHttpClient<OpenAITranscricaoService>();
 builder.Services.AddScoped<ITranscricaoService, TranscricaoOrquestradorService>();
 builder.Services.AddScoped<IDescricaoAnaliseService>(sp => sp.GetRequiredService<DescricaoAnaliseService>());
@@ -114,9 +108,6 @@ builder.Services.AddScoped<IAzureTextAnalyticsService, AzureTextAnalyticsService
 // --- GOOGLE CLOUD SPEECH (TODO: implementar GoogleSpeechTranscricaoService) ---
 builder.Services.Configure<GoogleCloudSpeechSettings>(builder.Configuration.GetSection(GoogleCloudSpeechSettings.SectionName));
 // builder.Services.AddScoped<GoogleSpeechTranscricaoService>(); // Classe ainda não implementada
-
-// Registra interface de abstração
-builder.Services.AddScoped<IAIProvider, GeminiProvider>();
 
 // --- DATABASE ---
 var dbPath = Environment.GetEnvironmentVariable("DB_PATH") ?? "sinistros.db";
