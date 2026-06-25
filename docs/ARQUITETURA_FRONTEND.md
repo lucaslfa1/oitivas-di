@@ -6,16 +6,16 @@ O código JavaScript foi organizado em uma **arquitetura modular** com separaç�
 
 ```
 wwwroot/js/
-├── app.js              ← 🚀 PONTO DE ENTRADA (orquestrador)
-├── main.js             ← 📦 Código legado (não usado, backup)
+├── app.js              ← PONTO DE ENTRADA (orquestrador)
+├── main.js             ← Código legado (não usado, backup)
 │
-├── api/                ← 🌐 Comunicação com Backend
+├── api/                ← Comunicação com Backend
 │   └── sinistroApi.js  → Todas as chamadas HTTP (fetch)
 │
-├── config/             ← ⚙️ Configurações
+├── config/             ← Configurações
 │   └── constants.js    → URLs, mapeamentos, limites
 │
-├── core/               ← 🧠 Núcleo da Aplicação
+├── core/               ← Núcleo da Aplicação
 │   ├── state.js        → Estado global (arquivos, transcrição, laudos)
 │   ├── drafts.js       → Rascunhos (localStorage)
 │   ├── storage.js      → Abstração do localStorage
@@ -24,7 +24,7 @@ wwwroot/js/
 │   ├── utils.js        → Funções utilitárias (capitalize, duração, etc)
 │   └── ids.js          → Geração de IDs únicos
 │
-├── ui/                 ← 🎨 Interface do Usuário
+├── ui/                 ← Interface do Usuário
 │   ├── modal.js        → Controle de modais, loaders, erros visuais
 │   ├── navigation.js   → Navegação entre abas (audio/foto/video/salvos)
 │   ├── upload.js       → Drag-and-drop e preview de arquivos
@@ -32,19 +32,19 @@ wwwroot/js/
 │   ├── user.js         → Perfil do usuário (avatar, nome)
 │   └── loadingButton.js→ Estado de loading nos botões
 │
-├── services/           ← ⚡ Lógica de Negócio
+├── services/           ← Lógica de Negócio
 │   ├── analise/        → SUB-MÓDULO de análise (abaixo)
 │   ├── export.js       → Copiar texto, exportar PDF
 │   ├── salvar.js       → Salvar análises no banco
 │   └── transcricao.js  → Formatação de transcrição
 │
-└── features/           ← 🗂️ Funcionalidades Específicas
+└── features/           ← Funcionalidades Específicas
     └── salvos.js       → Gestão de documentos salvos
 ```
 
 ---
 
-## 🔥 Fluxo Principal (app.js)
+## Fluxo Principal (app.js)
 
 O `app.js` é o **orquestrador**. Ele:
 
@@ -100,7 +100,7 @@ services/analise/
 
 ---
 
-## 🧠 core/state.js (Estado Global)
+## core/state.js (Estado Global)
 
 Armazena dados da sessão atual:
 
@@ -122,7 +122,7 @@ getLaudo('video') / setLaudo('video', markdown)
 
 ---
 
-## 🌐 api/sinistroApi.js (Chamadas HTTP)
+## api/sinistroApi.js (Chamadas HTTP)
 
 Centraliza TODAS as chamadas ao backend:
 
@@ -134,7 +134,7 @@ enviarParaAnalise(file, tipo)       → POST /api/analisar/foto ou /api/analisar
 
 ---
 
-## 🎨 ui/ (Interface)
+## ui/ (Interface)
 
 | Arquivo | Responsabilidade |
 |---------|------------------|
@@ -166,7 +166,7 @@ enviarParaAnalise(file, tipo)       → POST /api/analisar/foto ou /api/analisar
 
 ---
 
-## 📝 Fluxo: Gerar Laudo Pericial
+## Fluxo: Gerar Laudo Pericial
 
 ```
 1. Usuário clica "GERAR LAUDO PERICIAL"
@@ -186,7 +186,7 @@ enviarParaAnalise(file, tipo)       → POST /api/analisar/foto ou /api/analisar
 
 ---
 
-## 🔧 Como adicionar nova funcionalidade
+## Como adicionar nova funcionalidade
 
 ### Exemplo: Nova função de análise
 
@@ -207,7 +207,7 @@ enviarParaAnalise(file, tipo)       → POST /api/analisar/foto ou /api/analisar
 
 ---
 
-## ✅ Vantagens da Modularização
+## Vantagens da Modularização
 
 | Antes | Depois |
 |-------|--------|
@@ -218,7 +218,7 @@ enviarParaAnalise(file, tipo)       → POST /api/analisar/foto ou /api/analisar
 
 ---
 
-## 📌 Arquivos Importantes
+## Arquivos Importantes
 
 | Se você quer... | Edite... |
 |-----------------|----------|
