@@ -40,16 +40,6 @@ services:
     networks:
       - sinistro-net
 
-  # CallApp (React/Vite)
-  callapp:
-    build:
-      context: ./CallApp
-      dockerfile: Dockerfile
-    ports:
-      - "8081:8080"
-    networks:
-      - sinistro-net
-
 networks:
   sinistro-net:
     driver: bridge

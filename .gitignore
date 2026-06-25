@@ -1,9 +1,26 @@
+# Node
+node_modules/
+npm-debug.log*
+
 # Build artifacts
 bin/
 obj/
 publish/
 publish_azure/
 publish_novo/
+artifacts/
+_build_tmp/
+
+# Restos de trabalho / restore / backups
+temp_restore/
+backup/
+sentinel_cortex_logs.txt
+
+# Uploads e mídia gerada em runtime
+Backend/wwwroot/uploads/
+*.wav
+*.mp3
+*.mp4
 
 # Deploy packages
 *.zip

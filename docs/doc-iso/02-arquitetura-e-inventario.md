@@ -135,7 +135,7 @@ Responsabilidades:
 
 | Artefato | Finalidade |
 |---|---|
-| `docker-compose.yml` | Sobe backend, sentinel-cortex, dashboard e um servico `callapp` referenciado. |
+| `docker-compose.yml` | Sobe backend, sentinel-cortex e dashboard. |
 | `Dockerfile` | Build multi-stage do backend a partir da raiz. |
 | `Backend/Dockerfile` | Dockerfile especifico do backend. |
 | `sentinel-cortex/Dockerfile` | Python 3.11 slim + ffmpeg + requirements. |
