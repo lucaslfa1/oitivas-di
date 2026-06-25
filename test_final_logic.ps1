@@ -1,4 +1,4 @@
-$apiKey = "AIzaSyCFtDlr6-HwkjpdDAiSMyNDX6lrFaZhgZE"
+$apiKey = $env:GEMINI_API_KEY
 $model = "models/gemini-2.0-flash"
 
 # Simulating the parallel logic flow with a simple prompt

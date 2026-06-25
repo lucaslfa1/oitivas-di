@@ -1,4 +1,4 @@
-$apiKey = "AIzaSyCFtDlr6-HwkjpdDAiSMyNDX6lrFaZhgZE"
+$apiKey = $env:GEMINI_API_KEY
 $models = @("gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp")
 
 $body = @{

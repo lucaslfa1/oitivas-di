@@ -1,4 +1,4 @@
-$apiKey = "AIzaSyCFtDlr6-HwkjpdDAiSMyNDX6lrFaZhgZE"
+$apiKey = $env:GEMINI_API_KEY
 $url = "https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey"
 
 try {
