@@ -1,4 +1,4 @@
-# 🔐 Sistema de Autenticação e Controle de Acesso — Sentinel
+# Sistema de Autenticação e Controle de Acesso — Sentinel
 
 ## Objetivo
 
@@ -83,24 +83,24 @@ CREATE TABLE AuditLog (
 ```
 
 **Prós:**
-- ✅ Stateless (sem sessão no servidor)
-- ✅ Funciona bem com SPA (frontend JS)
-- ✅ Padrão da indústria
-- ✅ Fácil integração com Cloud Run
+- Stateless (sem sessão no servidor)
+- Funciona bem com SPA (frontend JS)
+- Padrão da indústria
+- Fácil integração com Cloud Run
 
 **Contras:**
-- ⚠️ Token pode ser roubado se não usar HTTPS
-- ⚠️ Logout requer invalidação no cliente
+- Token pode ser roubado se não usar HTTPS
+- Logout requer invalidação no cliente
 
 ### Opção B: Cookie-based Session
 
 **Prós:**
-- ✅ Mais simples de implementar
-- ✅ Logout real (invalida sessão no servidor)
+- Mais simples de implementar
+- Logout real (invalida sessão no servidor)
 
 **Contras:**
-- ❌ Requer estado no servidor
-- ❌ Menos adequado para APIs
+- Requer estado no servidor
+- Menos adequado para APIs
 
 > [!TIP]
 > **Recomendação:** Opção A (JWT) é mais adequada para a arquitetura atual do Sentinel.
