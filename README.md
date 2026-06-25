@@ -3,17 +3,17 @@
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-purple.svg)](https://dotnet.microsoft.com/)
 [![Google Cloud](https://img.shields.io/badge/Google%20Cloud-Run-4285F4.svg)](https://cloud.google.com/)
 
-## 📋 Descrição
+## Descrição
 
 Sistema especializado em análise forense de sinistros veiculares utilizando Inteligência Artificial para:
 
-- 🎙️ **Transcrição de Oitivas** - Converte áudios de ligações (Operador BAS ↔ Motorista) em texto estruturado
-- 🖼️ **Análise de Imagens** - Avalia danos em veículos através de fotografias
-- 🎬 **Análise de Vídeos** - Processa dashcams, câmeras de segurança e depoimentos em vídeo
-- 📝 **Geração de Laudos** - Produz relatórios técnicos periciais automatizados
-- 🔍 **Detecção de Fraudes** - Identifica inconsistências e padrões suspeitos
+- **Transcrição de Oitivas** - Converte áudios de ligações (Operador BAS ↔ Motorista) em texto estruturado
+- **Análise de Imagens** - Avalia danos em veículos através de fotografias
+- **Análise de Vídeos** - Processa dashcams, câmeras de segurança e depoimentos em vídeo
+- **Geração de Laudos** - Produz relatórios técnicos periciais automatizados
+- **Detecção de Fraudes** - Identifica inconsistências e padrões suspeitos
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 ```
 Sentinel/
@@ -97,7 +97,7 @@ dotnet run
 # Acesse http://localhost:5252
 ```
 
-## 🛡️ Regras Anti-Alucinação
+## Regras Anti-Alucinação
 
 O sistema implementa proteções rigorosas contra alucinações de IA:
 
@@ -106,20 +106,20 @@ O sistema implementa proteções rigorosas contra alucinações de IA:
 3. **Neutralidade** - Não acusa sem evidência
 4. **Confiança explícita** - Indica nível de certeza (Alto/Médio/Baixo)
 
-## 🔐 Segurança
+## Segurança
 
 - CORS configurado por ambiente
 - API keys em variáveis de ambiente (não no código)
 - Validação de entrada
 - Logs estruturados
 
-## 🌐 URL de Produção
+## URL de Produção
 
 **Cloud Run:** https://sinistro-api-557004456190.us-central1.run.app
 
-## 👤 Autor
+## Autor
 
-**Lucas Felipe** - [lucas.lfa@live.com](mailto:lucas.lfa@live.com)
+**Lucas Felipe** - lucas.lfa.sc@gmail.com
 
 ---
 
