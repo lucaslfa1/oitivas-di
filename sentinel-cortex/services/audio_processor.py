@@ -30,6 +30,7 @@ class AudioProcessor:
         # B. Trim Inteligente (Corta até achar voz)
         # Desabilitado na Fase 8: Cortar silêncio inicial destrói o alinhamento de 
         # timestamps retornado pela Azure Cloud (causando dessincronização da legenda no Frontend)
+        start_trim = 0
         
         # C. Normalizar volume final
         audio = normalize(audio, headroom=abs(self.target_dbfs))

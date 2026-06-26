@@ -435,6 +435,66 @@ public class MediaProcessorService : IMediaProcessorService
         }
     }
 
+    /// <summary>
+    /// Envia uma imagem base64 e as marcações para serem desenhadas no Python Media Processor.
+    /// Retorna a imagem base64 anotada ou null se falhar.
+    /// </summary>
+    public async Task<string?> AnnotateImageAsync(string imageBase64, List<ImageAnnotation> annotations)
+    {
+        if (!_settings.Enabled) return null;
+
+        try
+        {
+            _logger.LogInformation("Enviando imagem para anotação no Media Processor ({Count} marcações)...", annotations.Count);
+
+            var request = new AnnotateImageRequestDto
+            {
+                ImageBase64 = imageBase64,
+                Annotations = annotations.Select(a => new AnnotationItemDto
+                {
+                    Type = a.Type,
+                    Coordinates = a.Coordinates,
+                    Label = a.Label
+                }).ToList()
+            };
+
+            var jsonContent = JsonSerializer.Serialize(request, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+            var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("/process/annotate", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                _logger.LogWarning("Falha ao anotar imagem: {Error}", error);
+                return null;
+            }
+
+            var responseJson = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<AnnotateImageResponseDto>(responseJson, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (result == null || !result.Success || string.IsNullOrEmpty(result.AnnotatedImageBase64))
+            {
+                _logger.LogWarning("Resposta inválida do Media Processor ao anotar imagem");
+                return null;
+            }
+
+            return result.AnnotatedImageBase64;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Erro ao anotar imagem: {Error}", ex.Message);
+            return null;
+        }
+    }
+
     private static string GetExtensionFromMimeType(string mimeType) => mimeType.ToLower() switch
     {
         "audio/mpeg" => ".mp3",
@@ -530,6 +590,36 @@ public class MediaProcessorService : IMediaProcessorService
         [JsonPropertyName("message")]
         public string? Message { get; set; }
     }
+
+    private class AnnotationItemDto
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; set; } = "";
+
+        [JsonPropertyName("coordinates")]
+        public List<int> Coordinates { get; set; } = new();
+
+        [JsonPropertyName("label")]
+        public string? Label { get; set; }
+    }
+
+    private class AnnotateImageRequestDto
+    {
+        [JsonPropertyName("image_base64")]
+        public string ImageBase64 { get; set; } = "";
+
+        [JsonPropertyName("annotations")]
+        public List<AnnotationItemDto> Annotations { get; set; } = new();
+    }
+
+    private class AnnotateImageResponseDto
+    {
+        [JsonPropertyName("success")]
+        public bool Success { get; set; }
+
+        [JsonPropertyName("annotated_image_base64")]
+        public string? AnnotatedImageBase64 { get; set; }
+    }
 }
 
 // --- Public DTOs ---
@@ -575,4 +665,14 @@ public class ExtractedAudioResult
     public int ExtractedAudioSizeBytes { get; set; }
     public string AudioFormat { get; set; } = "mp3";
     public double VideoDurationSeconds { get; set; }
+}
+
+/// <summary>
+/// Marcação visual para desenhar na imagem
+/// </summary>
+public class ImageAnnotation
+{
+    public string Type { get; set; } = "";
+    public List<int> Coordinates { get; set; } = new();
+    public string? Label { get; set; }
 }

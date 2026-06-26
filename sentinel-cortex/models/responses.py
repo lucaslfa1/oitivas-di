@@ -52,3 +52,22 @@ class SentimentResponse(BaseModel):
     classification: str
     description: str
     metrics: dict
+
+
+class AnnotationItem(BaseModel):
+    """Item de anotação visual."""
+    type: str
+    coordinates: list[int]
+    label: str | None = None
+
+
+class AnnotateImageRequest(BaseModel):
+    """Requisição para anotação de imagem."""
+    image_base64: str
+    annotations: list[AnnotationItem]
+
+
+class AnnotateImageResponse(BaseModel):
+    """Resposta com imagem anotada."""
+    success: bool
+    annotated_image_base64: str | None = None

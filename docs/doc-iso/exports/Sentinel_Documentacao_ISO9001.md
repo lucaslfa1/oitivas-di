@@ -20,7 +20,7 @@ Documento consolidado gerado a partir de `docs/doc-iso`.
 | Documento | Documentacao ISO 9001 do Projeto Sentinel |
 | Pasta | `docs/doc-iso` |
 | Sistema | Sentinel - Analise forense de sinistros veiculares |
-| Repositorio | `https://github.com/lucaslfa84/sentinel-nstech` |
+| Repositorio | `https://github.com/lucaslfa1/oitivas-di` |
 | Base inspecionada | Branch `main`, commit `cd4e0e5` |
 | Data de elaboracao | 2026-05-18 |
 | Responsavel tecnico | Equipe do projeto Sentinel |

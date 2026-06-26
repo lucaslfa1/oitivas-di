@@ -32,13 +32,14 @@ public class AppDbContext : DbContext
 
         // Seed Users
         modelBuilder.Entity<UserModel>().HasData(
-            new UserModel { Id = 1, Username = "admin", Password = "admin123", Role = "Admin" },
+            new UserModel { Id = 1, Username = "admin", Password = "admin", Role = "Admin" },
             new UserModel { Id = 2, Username = "Guerra", Password = "Guerr@2026", Role = "Coordenador" },
             new UserModel { Id = 3, Username = "Supervisor", Password = "Super@2026", Role = "Supervisor" },
             new UserModel { Id = 4, Username = "Analista", Password = "Analista@open2026", Role = "Analista" },
             new UserModel { Id = 5, Username = "Operador", Password = "Operador@2026open", Role = "Operador" },
             new UserModel { Id = 6, Username = "Daniele", Password = "Gestão2026", Role = "Coordenador" },
-            new UserModel { Id = 7, Username = "Fabricio", Password = "Fabricio@2026", Role = "Admin" }
+            new UserModel { Id = 7, Username = "Fabricio", Password = "Fabricio@2026", Role = "Admin" },
+            new UserModel { Id = 8, Username = "teste", Password = "teste123", Role = "Admin" }
         );
     }
 }

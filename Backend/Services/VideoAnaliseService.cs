@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using SinistroAPI.Configuration;
 
@@ -67,7 +69,105 @@ public class VideoAnaliseService
         var captions = BuildKeyframeCaptions(keyframes.Count, duracaoSeg);
         var prompt = $"{GetVideoPrompt(duracao)}{BuildTimestampInstruction(duracaoSeg)}\n\nCONTEXTO DO USUÁRIO: {contextoUsuario}";
 
-        return await _azureOpenAI.GenerateVisionAsync(prompt, "", imagens, captions: captions);
+        var rawReport = await _azureOpenAI.GenerateVisionAsync(prompt, "", imagens, captions: captions);
+
+        string cleanReport = rawReport;
+        var annotationsXmlStart = rawReport.IndexOf("<anotacoes_forenses>");
+        var annotationsXmlEnd = rawReport.IndexOf("</anotacoes_forenses>");
+
+        List<GPTAnnotation>? gptAnnotations = null;
+
+        if (annotationsXmlStart >= 0 && annotationsXmlEnd > annotationsXmlStart)
+        {
+            var jsonStart = annotationsXmlStart + "<anotacoes_forenses>".Length;
+            var jsonLength = annotationsXmlEnd - jsonStart;
+            var jsonStr = rawReport.Substring(jsonStart, jsonLength).Trim();
+
+            // Remove o bloco xml do relatório final do usuário
+            cleanReport = (rawReport.Substring(0, annotationsXmlStart) + rawReport.Substring(annotationsXmlEnd + "</anotacoes_forenses>".Length)).Trim();
+
+            // Limpa formatação markdown se houver
+            if (jsonStr.StartsWith("```json"))
+            {
+                jsonStr = jsonStr.Substring("```json".Length).Trim();
+            }
+            else if (jsonStr.StartsWith("```"))
+            {
+                jsonStr = jsonStr.Substring("```".Length).Trim();
+            }
+            if (jsonStr.EndsWith("```"))
+            {
+                jsonStr = jsonStr.Substring(0, jsonStr.Length - "```".Length).Trim();
+            }
+
+            try
+            {
+                gptAnnotations = JsonSerializer.Deserialize<List<GPTAnnotation>>(jsonStr, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Falha ao desserializar anotações forenses do GPT: {Error}. JSON: {Json}", ex.Message, jsonStr);
+            }
+        }
+
+        if (gptAnnotations != null && gptAnnotations.Count > 0)
+        {
+            var annexBuilder = new System.Text.StringBuilder();
+            annexBuilder.AppendLine();
+            annexBuilder.AppendLine();
+            annexBuilder.AppendLine("## 5.0 ANEXO ILUSTRATIVO (REGISTROS FORENSES)");
+            annexBuilder.AppendLine("Esta seção apresenta ilustrações periciais extraídas do vídeo com marcações indicativas e observações técnicas adicionais.");
+            annexBuilder.AppendLine();
+
+            int ilustracaoIndex = 1;
+            foreach (var ann in gptAnnotations)
+            {
+                if (ann.Quadro < 1 || ann.Quadro > keyframes.Count)
+                {
+                    _logger.LogWarning("Índice de quadro fora do intervalo: {Quadro} (total de keyframes: {Total})", ann.Quadro, keyframes.Count);
+                    continue;
+                }
+
+                var base64Frame = keyframes[ann.Quadro - 1];
+
+                // Chama o serviço de anotação
+                var singleAnnotation = new ImageAnnotation
+                {
+                    Type = ann.Tipo,
+                    Coordinates = ann.Coordenadas,
+                    Label = ann.Legenda
+                };
+
+                var annotatedBase64 = await _mediaProcessor.AnnotateImageAsync(base64Frame, new List<ImageAnnotation> { singleAnnotation });
+
+                if (!string.IsNullOrEmpty(annotatedBase64))
+                {
+                    // Encontra o timestamp correspondente ao quadro
+                    var t = duracaoSeg > 0 && keyframes.Count > 1 ? (double)(ann.Quadro - 1) * duracaoSeg / (keyframes.Count - 1) : 0;
+                    var timestampFormatted = duracaoSeg > 0 ? $"[{FormatTimestamp(t)}]" : $"Quadro {ann.Quadro}";
+
+                    annexBuilder.AppendLine($"### Ilustração {ilustracaoIndex}: {ann.Legenda}");
+                    annexBuilder.AppendLine($"![{ann.Legenda}](data:image/jpeg;base64,{annotatedBase64})");
+                    annexBuilder.AppendLine($"*Momento aproximado: {timestampFormatted} - {ann.DescricaoDetalhada}*");
+                    annexBuilder.AppendLine();
+                    ilustracaoIndex++;
+                }
+                else
+                {
+                    _logger.LogWarning("Falha ao gerar anotação para o quadro {Quadro}", ann.Quadro);
+                }
+            }
+
+            if (ilustracaoIndex > 1)
+            {
+                cleanReport += annexBuilder.ToString();
+            }
+        }
+
+        return cleanReport;
     }
 
     /// <summary>Converte "H:MM:SS", "M:SS" ou um número de segundos em total de segundos. Retorna 0 se desconhecido.</summary>
@@ -170,5 +270,23 @@ public class VideoAnaliseService
             _logger.LogWarning("Falha ao extrair keyframes: {Error}", ex.Message);
             return null;
         }
+    }
+
+    private class GPTAnnotation
+    {
+        [JsonPropertyName("quadro")]
+        public int Quadro { get; set; }
+
+        [JsonPropertyName("tipo")]
+        public string Tipo { get; set; } = "";
+
+        [JsonPropertyName("coordenadas")]
+        public List<int> Coordenadas { get; set; } = new();
+
+        [JsonPropertyName("legenda")]
+        public string Legenda { get; set; } = "";
+
+        [JsonPropertyName("descricao_detalhada")]
+        public string DescricaoDetalhada { get; set; } = "";
     }
 }

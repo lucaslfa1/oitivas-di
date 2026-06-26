@@ -5,6 +5,9 @@ from .responses import (
     ExtractedAudioResponse,
     CacheStatsResponse,
     SentimentResponse,
+    AnnotationItem,
+    AnnotateImageRequest,
+    AnnotateImageResponse,
 )
 
 __all__ = [
@@ -13,4 +16,7 @@ __all__ = [
     "ExtractedAudioResponse",
     "CacheStatsResponse",
     "SentimentResponse",
+    "AnnotationItem",
+    "AnnotateImageRequest",
+    "AnnotateImageResponse",
 ]

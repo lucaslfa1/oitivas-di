@@ -136,6 +136,11 @@ public class TranscricaoControllerTests
         {
             return Task.FromResult<ProcessedAudioResult?>(null);
         }
+
+        public Task<string?> AnnotateImageAsync(string imageBase64, List<ImageAnnotation> annotations)
+        {
+            return Task.FromResult<string?>(null);
+        }
     }
 
     private sealed class FakeAzureTextAnalyticsService : IAzureTextAnalyticsService

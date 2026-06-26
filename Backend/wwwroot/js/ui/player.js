@@ -53,7 +53,7 @@ export function seekTo(timeString) {
     // Se for vídeo, também ajusta
     if (video && video.src) {
         video.currentTime = seconds;
-        video.play().catch(e => console.warn("Auto-play blocked:", e));
-        console.log("Video seek executado");
+        video.pause();
+        console.log("Video seek executado e pausado");
     }
 }

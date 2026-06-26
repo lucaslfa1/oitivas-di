@@ -14,6 +14,8 @@ from models.responses import (
     ProcessedAudioResponse,
     ProcessedVideoResponse,
     ExtractedAudioResponse,
+    AnnotateImageRequest,
+    AnnotateImageResponse,
 )
 from services.audio_processor import AudioProcessor
 from services.video_processor import VideoProcessor
@@ -285,4 +287,77 @@ async def convert_to_wav_direct(file: UploadFile = File(...)):
                 
     except Exception as e:
         logger.error(f"Erro na conversão manual: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/annotate", response_model=AnnotateImageResponse)
+async def annotate_image(payload: AnnotateImageRequest):
+    """
+    Desenha setas, retângulos ou círculos em uma imagem base64 e retorna a imagem anotada em base64.
+    """
+    try:
+        if not video_proc._ensure_dependencies():
+            raise HTTPException(status_code=500, detail="Dependências de processamento de imagem (OpenCV) não disponíveis.")
+
+        cv2 = video_proc._cv2
+        np = video_proc._numpy
+
+        try:
+            img_data = base64.b64decode(payload.image_base64)
+            np_arr = np.frombuffer(img_data, np.uint8)
+            image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Erro ao decodificar imagem base64: {str(e)}")
+
+        if image is None:
+            raise HTTPException(status_code=400, detail="Imagem inválida ou corrompida.")
+
+        h, w, _ = image.shape
+
+        for ann in payload.annotations:
+            t = ann.type.lower()
+            coords = ann.coordinates
+            if len(coords) < 4:
+                continue
+
+            ymin, xmin, ymax, xmax = coords
+            y1 = int(ymin * h / 1000.0)
+            x1 = int(xmin * w / 1000.0)
+            y2 = int(ymax * h / 1000.0)
+            x2 = int(xmax * w / 1000.0)
+
+            color = (0, 107, 255)
+            thickness = max(2, int(min(w, h) / 300.0))
+
+            if t in ["retangulo", "rectangle", "rect"]:
+                cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness)
+            elif t in ["circulo", "circle", "circ"]:
+                center_x = (x1 + x2) // 2
+                center_y = (y1 + y2) // 2
+                radius = int(np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 2.0)
+                cv2.circle(image, (center_x, center_y), radius, color, thickness)
+            elif t in ["seta", "arrow"]:
+                cv2.arrowedLine(image, (x1, y1), (x2, y2), color, thickness, tipLength=0.2)
+
+            label = ann.label
+            if label:
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = max(0.4, min(w, h) / 1000.0)
+                (text_w, text_h), _ = cv2.getTextSize(label, font, font_scale, 1)
+                ly = max(text_h + 10, y1 - 5)
+                lx = max(5, x1)
+
+                cv2.rectangle(image, (lx, ly - text_h - 5), (lx + text_w + 5, ly + 5), (0, 0, 0), -1)
+                cv2.putText(image, label, (lx + 2, ly - 2), font, font_scale, (255, 255, 255), 1, cv2.LINE_AA)
+
+        success, buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        if not success:
+            raise HTTPException(status_code=500, detail="Erro ao codificar imagem processada.")
+
+        annotated_b64 = base64.b64encode(buffer).decode('utf-8')
+        return AnnotateImageResponse(success=True, annotated_image_base64=annotated_b64)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[SENTINEL] Erro ao anotar imagem: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
