@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.SignalR;
 using SinistroAPI.Hubs;
 using SinistroAPI.Interfaces;
+using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace SinistroAPI.Services;
@@ -10,6 +12,7 @@ public class TranscricaoOrquestradorService : ITranscricaoService
     private readonly AzureFastTranscricaoService _azureSpeechToText;
     private readonly AzureWhisperService _azureWhisper;
     private readonly MediaProcessorService _mediaProcessor;
+    private readonly AzureOpenAIService _azureOpenAI;
     private readonly ILogger<TranscricaoOrquestradorService> _logger;
     private readonly IHubContext<AnalysisHub> _hubContext;
 
@@ -19,12 +22,14 @@ public class TranscricaoOrquestradorService : ITranscricaoService
         AzureFastTranscricaoService azureSpeechToText,
         AzureWhisperService azureWhisper,
         MediaProcessorService mediaProcessor,
+        AzureOpenAIService azureOpenAI,
         ILogger<TranscricaoOrquestradorService> logger,
         IHubContext<AnalysisHub> hubContext)
     {
         _azureSpeechToText = azureSpeechToText;
         _azureWhisper = azureWhisper;
         _mediaProcessor = mediaProcessor;
+        _azureOpenAI = azureOpenAI;
         _logger = logger;
         _hubContext = hubContext;
     }
@@ -119,10 +124,68 @@ public class TranscricaoOrquestradorService : ITranscricaoService
             $"Transcricao indisponivel em modo Azure-only. Ultimo erro: {ultimaFalha ?? "desconhecido"}");
     }
 
-    public Task<Dictionary<string, string>> ExtrairDadosOitiva(string transcricao)
+    public async Task<Dictionary<string, string>> ExtrairDadosOitiva(string transcricao)
     {
-        _logger.LogInformation("Extracao de dados desativada em modo Azure-only.");
-        return Task.FromResult(new Dictionary<string, string>());
+        if (string.IsNullOrWhiteSpace(transcricao))
+        {
+            return new Dictionary<string, string>();
+        }
+
+        try
+        {
+            if (!_azureOpenAI.IsConfigured)
+            {
+                _logger.LogWarning("Azure OpenAI não configurado para extração de dados.");
+                return new Dictionary<string, string>();
+            }
+
+            _logger.LogInformation("Iniciando extração de dados via Azure OpenAI GPT-4o...");
+            var systemPrompt = "Você é um extrator de dados forenses preciso. Extraia as informações solicitadas no formato JSON exato.";
+            var prompt = $"{Prompts.SinistroPrompts.PromptExtracaoDadosOitiva}\n\nTRANSCRIÇÃO:\n{transcricao}";
+
+            var jsonResult = await _azureOpenAI.GenerateContentAsync(prompt, systemPrompt);
+
+            var cleanJson = jsonResult.Trim();
+            if (cleanJson.StartsWith("```"))
+            {
+                var lines = cleanJson.Split('\n');
+                var builder = new StringBuilder();
+                foreach (var line in lines)
+                {
+                    if (!line.Trim().StartsWith("```"))
+                    {
+                        builder.AppendLine(line);
+                    }
+                }
+                cleanJson = builder.ToString().Trim();
+            }
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var rawDict = JsonSerializer.Deserialize<Dictionary<string, object>>(cleanJson, options);
+
+            var result = new Dictionary<string, string>();
+            if (rawDict != null)
+            {
+                foreach (var kvp in rawDict)
+                {
+                    if (kvp.Value != null)
+                    {
+                        var strVal = kvp.Value.ToString()?.Trim();
+                        if (!string.IsNullOrEmpty(strVal) && strVal != "null")
+                        {
+                            result[kvp.Key] = strVal;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao extrair dados da oitiva");
+            return new Dictionary<string, string>();
+        }
     }
 
     private async Task SendProgressAsync(string? connectionId, string message, int percent)
