@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel | nstech</title>
+    <script>
+        if (!localStorage.getItem('sentinel-auth')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="layout/base.css">
+    <link rel="stylesheet" href="layout/sidebar.css">
+    <link rel="stylesheet" href="layout/panels.css">
+    <link rel="stylesheet" href="layout/buttons.css">
+    <link rel="stylesheet" href="layout/saved-files.css">
+    <link rel="stylesheet" href="layout/responsive.css">
+    <link rel="stylesheet" href="layout/modal.css">
+    <link rel="stylesheet" href="layout/insights.css">
+
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <style>
+        /* Logo Sentinel Styles */
+        .logo-tower {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
+            }
+
+            to {
+                text-shadow: 0 0 25px rgba(255, 107, 0, 0.7);
+            }
+        }
+
+        .app-logo-text {
+            text-align: center;
+            margin: 8px 0;
+        }
+
+        .logo-tagline {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            font-weight: 500;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .btn-logout-link {
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 2px;
+            text-align: left;
+        }
+
+        .btn-logout-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
+            <i data-lucide="menu"></i>
+        </button>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-company">
+                    <img src="assets/logo-nstech.png" alt="nstech" class="company-logo">
+                </div>
+                <div class="brand-logo">
+                    <div class="app-logo-text">
+                        <span class="logo-tower">Sentinel</span>
+                        <div class="logo-tagline">INTEGRATED LOGISTICS</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="menu">
+
+                <button class="menu-item active" id="nav-audio" onclick="setMode('audio')">
+                    <i data-lucide="headphones"></i> <span>Oitivas</span>
+                </button>
+                <button class="menu-item" id="nav-foto" onclick="setMode('foto')">
+                    <i data-lucide="image"></i> <span>Imagens</span>
+                </button>
+                <button class="menu-item" id="nav-video" onclick="setMode('video')">
+                    <i data-lucide="clapperboard"></i> <span>Vídeos</span>
+                </button>
+                <button class="menu-item" id="nav-salvos" onclick="setMode('salvos')">
+                    <i data-lucide="folder-open"></i> <span>Arquivos</span>
+                </button>
+                <button class="menu-item" onclick="abrirModalDash()">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span>Dashboard</span>
+                </button>
+            </nav>
+
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar">OP</div>
+                <div class="info">
+                    <strong id="userNameDisplay">Operador</strong>
+                    <span class="user-role" id="userRole">Membro</span>
+                    <button onclick="logout()" class="btn-logout-link">Sair</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-wrapper">
+            <div class="top-bar">
+                <button id="themeToggle" class="theme-switch-btn" title="Alternar Tema">
+                    <i data-lucide="sun" id="themeIcon"></i>
+                </button>
+            </div>
+
+            <div class="content-area">
+                <!-- PAINEL AUDIO/OITIVA -->
+                <section id="panel-audio" class="panel active">
+                    <header class="panel-header">
+                        <h2>Oitivas</h2>
+                        <p>Análise de áudio.</p>
+                    </header>
+                    <div class="split-layout">
+                        <div class="card input-card">
+                            <div class="card-tabs">
+                                <button class="tab-btn active" onclick="switchAudioTab('upload')">Análise
+                                    Individual</button>
+                                <button class="tab-btn" onclick="switchAudioTab('merge')">Juntar Ligações</button>
+                            </div>
+
+                            <!-- TAB UPLOAD -->
+                            <div id="tab-upload" class="tab-content active">
+                                <h3>Upload de Arquivo</h3>
+                                <div class="drop-zone" id="dropZoneAudio">
+                                    <i data-lucide="headphones" class="icon-lg"></i>
+                                    <p>Clique ou arraste o arquivo</p>
+                                    <input type="file" id="inputAudio" hidden accept="audio/*, .mpeg, .mpg, video/mpeg">
+                                </div>
+                                <div id="audioPreviewBox" class="media-preview-box hidden">
+                                    <div class="file-header">
+                                        <span id="audioName" class="file-name">audio.wav</span>
+                                        <button onclick="clearFile('audio')" class="btn-icon"><i
+                                                data-lucide="x"></i></button>
+                                    </div>
+                                    <div id="waveform" class="waveform-container"></div>
+                                    <div class="waveform-controls">
+                                        <button id="btnPlayPause" class="btn-icon-circle"><i
+                                                data-lucide="play"></i></button>
+                                        <span id="timeCurrent">00:00</span> / <span id="timeTotal">00:00</span>
+                                    </div>
+                                    <audio id="audioPreview" class="hidden"></audio>
+                                </div>
+
+                                <div class="btn-group">
+                                    <button onclick="gerarTranscricao()" class="btn-primary"
+                                        id="btnGerarTranscricao">TRANSCREVER</button>
+                                </div>
+
+                                <div id="progressContainer" class="progress-box hidden">
+                                    <div class="progress-info">
+                                        <span id="progressStatus">Aguardando...</span>
+                                        <span id="progressPercent">0%</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div id="progressBar" class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB MERGE -->
+                            <div id="tab-merge" class="tab-content hidden">
+                                <h3>Juntar Ligações</h3>
+                                <p class="text-sm text-muted">Enviar arquivos para unir em um único áudio e analisar.
+                                </p>
+
+                                <div class="drop-zone" id="dropZoneMerge"
+                                    style="border-style: dashed; padding: 20px; margin-top: 10px;">
+                                    <i data-lucide="layers" class="icon-lg"></i>
+                                    <p>Adicionar partes (áudios)</p>
+                                    <input type="file" id="inputMerge" hidden multiple
+                                        accept="audio/*, .mpeg, .mpg, video/mpeg">
+                                </div>
+
+                                <ul id="mergeFileList" class="file-list-merge"></ul>
+
+                                <div class="btn-group">
+                                    <button id="btnMerge" class="btn-primary" disabled>JUNTAR E ANALISAR</button>
+                                    <button id="btnSaveMerge" class="btn-secondary hidden" disabled><i
+                                            data-lucide="download"></i> BAIXAR ÁUDIO</button>
+                                </div>
+                                <p id="mergeStatus" class="status-text"></p>
+
+                                <!-- Preview do Merge -->
+                                <div id="mergePreviewBox" class="media-preview-box hidden" style="margin-top: 15px;">
+                                    <div class="file-header">
+                                        <span id="mergeAudioName" class="file-name">audio_merged.wav</span>
+                                        <button onclick="clearFile('merge')" class="btn-icon"><i
+                                                data-lucide="x"></i></button>
+                                    </div>
+                                    <audio id="mergeAudioPreview" controls class="w-full"
+                                        style="width: 100%; margin-top: 5px;"></audio>
+                                </div>
+
+                                <div class="btn-group hidden" id="btnGroupMergeAction">
+                                    <button onclick="gerarTranscricao()" class="btn-primary"
+                                        id="btnGerarTranscricaoMerge">TRANSCREVER</button>
+                                </div>
+
+                                <div id="progressContainerMerge" class="progress-box hidden">
+                                    <div class="progress-info">
+                                        <span id="progressStatusMerge">Aguardando...</span>
+                                        <span id="progressPercentMerge">0%</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div id="progressBarMerge" class="progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card result-card">
+                            <h3>Resultado</h3>
+                            <div id="audioEmptyState" class="empty-state">
+                                <i data-lucide="file-audio"></i>
+                                <p>Aguardando áudio.</p>
+                            </div>
+                            <div id="transcricaoContainer" class="result-container hidden">
+                                <div class="result-section">
+                                    <div class="result-header">
+                                        <h4><i data-lucide="scroll-text"></i> Transcrição</h4>
+                                        <button onclick="toggleEditTranscricao()" class="btn-icon hidden" title="Editar"
+                                            id="btnEditTranscricao">
+                                            <i data-lucide="edit-3"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- INSIGHTS AUTOMÁTICOS -->
+                                    <div id="insightsContainer" class="insights-box hidden">
+                                        <div class="insights-header">
+                                            <h5><i data-lucide="lightbulb"></i> Insights Automáticos</h5>
+                                            <button
+                                                onclick="document.getElementById('insightsContainer').classList.add('hidden')"
+                                                class="btn-icon-sm"><i data-lucide="x"></i></button>
+                                        </div>
+                                        <div id="insightsContent" class="insights-grid"></div>
+                                    </div>
+                                    <div id="transcricaoView" class="markdown-body"></div>
+                                    <div id="transcricaoEdit" class="edit-area hidden">
+                                        <div id="transcricaoEditableContent" class="editable-content markdown-body"
+                                            contenteditable="true"></div>
+                                        <div class="edit-actions-inline">
+                                            <button onclick="salvarEdicaoTranscricao()" class="btn-success btn-sm"><i
+                                                    data-lucide="check"></i> Salvar</button>
+                                            <button onclick="cancelarEdicaoTranscricao()"
+                                                class="btn-secondary btn-sm"><i data-lucide="x"></i> Cancelar</button>
+                                        </div>
+                                    </div>
+                                    <div class="result-actions hidden" id="actionsTranscricao">
+                                        <button onclick="copiarTexto('transcricao')" class="btn-secondary btn-sm"><i
+                                                data-lucide="copy"></i> Copiar</button>
+                                        <button onclick="exportarPDF('transcricao')" class="btn-secondary btn-sm"><i
+                                                data-lucide="file-text"></i> PDF</button>
+                                        <button onclick="exportarWord('transcricao')" class="btn-secondary btn-sm"><i
+                                                data-lucide="file"></i> Word</button>
+                                        <button onclick="downloadMergedAudio()" class="btn-secondary btn-sm"
+                                            title="Baixar Áudio"><i data-lucide="download"></i> Áudio</button>
+                                        <button onclick="salvarTranscricao()" class="btn-secondary btn-sm"><i
+                                                data-lucide="save"></i> Salvar</button>
+                                        <button onclick="limparResultado('transcricao')" class="btn-secondary btn-sm"
+                                            title="Limpar transcrição e iniciar novo"><i data-lucide="rotate-ccw"></i>
+                                            Novo</button>
+                                    </div>
+                                </div>
+
+                                <div class="btn-group" style="margin-top: 1rem;">
+                                    <button onclick="gerarRelatorioPericial()" class="btn-primary"
+                                        id="btnGerarRelatorio">
+                                        <i data-lucide="sparkles"></i> GERAR LAUDO PERICIAL
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="laudoContainer" class="result-container hidden">
+                                <div class="result-section">
+                                    <div class="result-header">
+                                        <h4><i data-lucide="file-search"></i> Laudo Pericial</h4>
+                                        <button onclick="toggleEditLaudo()" class="btn-icon hidden" title="Editar"
+                                            id="btnEditLaudo">
+                                            <i data-lucide="edit-3"></i>
+                                        </button>
+                                    </div>
+                                    <div id="dadosIdentificadosContainer" class="hidden" style="margin-bottom: 20px;">
+                                        <div class="result-header">
+                                            <h4><i data-lucide="table"></i> Dados Identificados</h4>
+                                        </div>
+                                        <div id="dadosIdentificadosView" class="markdown-body"
+                                            style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
+                                        </div>
+                                    </div>
+
+                                    <div id="laudoView" class="markdown-body"></div>
+                                    <div id="laudoEdit" class="edit-area hidden">
+                                        <div id="laudoEditableContent" class="editable-content markdown-body"
+                                            contenteditable="true"></div>
+                                        <div class="edit-actions-inline">
+                                            <button onclick="salvarEdicaoLaudo()" class="btn-success btn-sm"><i
+                                                    data-lucide="check"></i> Salvar</button>
+                                            <button onclick="cancelarEdicaoLaudo()" class="btn-secondary btn-sm"><i
+                                                    data-lucide="x"></i> Cancelar</button>
+                                        </div>
+                                    </div>
+                                    <div class="result-actions hidden" id="actionsLaudo">
+                                        <button onclick="copiarTexto('audio')" class="btn-secondary btn-sm"><i
+                                                data-lucide="copy"></i> Copiar</button>
+                                        <button onclick="exportarPDF('audio')" class="btn-secondary btn-sm"><i
+                                                data-lucide="file-text"></i> PDF</button>
+                                        <button onclick="exportarWord('audio')" class="btn-secondary btn-sm"><i
+                                                data-lucide="file"></i> Word</button>
+                                        <button onclick="salvarAnalise('audio')" class="btn-secondary btn-sm"><i
+                                                data-lucide="save"></i> Salvar</button>
+                                        <button onclick="limparResultado('audio')" class="btn-secondary btn-sm"
+                                            title="Limpar laudo e iniciar novo"><i data-lucide="rotate-ccw"></i>
+                                            Novo</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PAINEL FOTO -->
+                <section id="panel-foto" class="panel hidden">
+                    <header class="panel-header">
+                        <h2>Imagens</h2>
+                        <p>Análise de fotos.</p>
+                    </header>
+                    <div class="split-layout">
+                        <div class="card input-card">
+                            <h3>Evidência</h3>
+                            <div class="drop-zone" id="dropZoneFoto">
+                                <i data-lucide="image" class="icon-lg"></i>
+                                <p>Clique ou arraste a foto</p>
+                                <input type="file" id="inputFoto" hidden accept="image/*">
+                            </div>
+                            <div id="fotoPreviewBox" class="media-preview-box hidden">
+                                <div class="file-header">
+                                    <span id="fotoName" class="file-name">foto.jpg</span>
+                                    <button onclick="clearFile('foto')" class="btn-icon"><i
+                                            data-lucide="x"></i></button>
+                                </div>
+                                <img id="fotoPreview" class="visual-preview">
+                            </div>
+                            <label>Prompt adicional</label>
+                            <textarea id="ctxFoto"
+                                placeholder="Instruções específicas..."></textarea>
+                            <button onclick="processar('foto')" class="btn-primary" id="btnFoto">ANALISAR</button>
+                        </div>
+                        <div class="card result-card">
+                            <div class="result-header">
+                                <h3>Laudo Pericial</h3>
+                                <div class="result-header-actions">
+                                    <button onclick="maximizarLaudo('foto')" class="btn-icon" title="Maximizar laudo"
+                                        id="btnMaxFoto">
+                                        <i data-lucide="maximize-2"></i>
+                                    </button>
+                                    <button onclick="toggleEditFoto()" class="btn-icon hidden" title="Editar"
+                                        id="btnEditFoto">
+                                        <i data-lucide="edit-3"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="fotoViewArea">
+                                <div id="outputFoto" class="markdown-body">
+                                    <div class="empty-state">
+                                        <i data-lucide="image"></i>
+                                        <p>Aguardando imagem.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="fotoEditArea" class="edit-area hidden">
+                                <div id="fotoEditableContent" class="editable-content markdown-body"
+                                    contenteditable="true"></div>
+                                <div class="edit-actions-inline">
+                                    <button onclick="salvarEdicaoFoto()" class="btn-success btn-sm"><i
+                                            data-lucide="check"></i> Salvar</button>
+                                    <button onclick="cancelarEdicaoFoto()" class="btn-secondary btn-sm"><i
+                                            data-lucide="x"></i> Cancelar</button>
+                                </div>
+                            </div>
+                            <div class="result-actions hidden" id="actionsFoto">
+                                <button onclick="copiarTexto('foto')" class="btn-secondary btn-sm"><i
+                                        data-lucide="copy"></i> Copiar</button>
+                                <button onclick="exportarPDF('foto')" class="btn-secondary btn-sm"><i
+                                        data-lucide="file-text"></i> PDF</button>
+                                <button onclick="exportarWord('foto')" class="btn-secondary btn-sm"><i
+                                        data-lucide="file"></i> Word</button>
+                                <button onclick="salvarAnalise('foto')" class="btn-secondary btn-sm"><i
+                                        data-lucide="save"></i> Salvar</button>
+                                <button onclick="limparResultado('foto')" class="btn-secondary btn-sm"
+                                    title="Limpar laudo e iniciar novo"><i data-lucide="rotate-ccw"></i> Novo</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PAINEL VIDEO -->
+                <section id="panel-video" class="panel hidden">
+                    <header class="panel-header">
+                        <h2>Vídeos</h2>
+                        <p>Análise de vídeos.</p>
+                    </header>
+                    <div class="split-layout">
+                        <div class="card input-card">
+                            <h3>Evidência</h3>
+                            <div class="drop-zone" id="dropZoneVideo">
+                                <i data-lucide="clapperboard" class="icon-lg"></i>
+                                <p>Clique ou arraste o vídeo</p>
+                                <input type="file" id="inputVideo" hidden accept="video/*">
+                            </div>
+                            <div id="videoPreviewBox" class="media-preview-box hidden">
+                                <div class="file-header">
+                                    <span id="videoName" class="file-name">video.mp4</span>
+                                    <button onclick="clearFile('video')" class="btn-icon"><i
+                                            data-lucide="x"></i></button>
+                                </div>
+                                <video id="videoPreview" controls class="visual-preview" preload="auto" playsinline></video>
+                            </div>
+                            <label>Prompt adicional</label>
+                            <textarea id="ctxVideo"
+                                placeholder="Instruções específicas..."></textarea>
+                            <button onclick="processar('video')" class="btn-primary" id="btnVideo">ANALISAR</button>
+                        </div>
+                        <div class="card result-card">
+                            <div class="result-header">
+                                <h3>Laudo Pericial</h3>
+                                <div class="result-header-actions">
+                                    <button onclick="maximizarLaudo('video')" class="btn-icon" title="Maximizar laudo"
+                                        id="btnMaxVideo">
+                                        <i data-lucide="maximize-2"></i>
+                                    </button>
+                                    <button onclick="toggleEditVideo()" class="btn-icon hidden" title="Editar"
+                                        id="btnEditVideo">
+                                        <i data-lucide="edit-3"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="videoViewArea" class="video-result-scroll">
+                                <div id="outputVideo" class="markdown-body">
+                                    <div class="empty-state">
+                                        <i data-lucide="clapperboard"></i>
+                                        <p>Aguardando vídeo.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="videoEditArea" class="edit-area hidden">
+                                <div id="videoEditableContent" class="editable-content markdown-body"
+                                    contenteditable="true"></div>
+                                <div class="edit-actions-inline">
+                                    <button onclick="salvarEdicaoVideo()" class="btn-success btn-sm"><i
+                                            data-lucide="check"></i> Salvar</button>
+                                    <button onclick="cancelarEdicaoVideo()" class="btn-secondary btn-sm"><i
+                                            data-lucide="x"></i> Cancelar</button>
+                                </div>
+                            </div>
+                            <div class="result-actions hidden" id="actionsVideo">
+                                <button onclick="copiarTexto('video')" class="btn-secondary btn-sm"><i
+                                        data-lucide="copy"></i> Copiar</button>
+                                <button onclick="exportarPDF('video')" class="btn-secondary btn-sm"><i
+                                        data-lucide="file-text"></i> PDF</button>
+                                <button onclick="exportarWord('video')" class="btn-secondary btn-sm"><i
+                                        data-lucide="file"></i> Word</button>
+                                <button onclick="salvarAnalise('video')" class="btn-secondary btn-sm"><i
+                                        data-lucide="save"></i> Salvar</button>
+                                <button onclick="limparResultado('video')" class="btn-secondary btn-sm"
+                                    title="Limpar laudo e iniciar novo"><i data-lucide="rotate-ccw"></i> Novo</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PAINEL SALVOS -->
+                <section id="panel-salvos" class="panel hidden">
+                    <header class="panel-header">
+                        <h2>Arquivos</h2>
+                        <p>Arquivos salvos.</p>
+                    </header>
+                    <div class="split-layout">
+                        <div class="card input-card">
+                            <h3>Arquivos Salvos</h3>
+                            <div class="saved-files-filters">
+                                <button class="filter-btn active" data-filter="todos"
+                                    onclick="filtrarSalvos('todos')">Todos</button>
+                                <button class="filter-btn" data-filter="audio"
+                                    onclick="filtrarSalvos('audio')">Oitivas</button>
+                                <button class="filter-btn" data-filter="foto"
+                                    onclick="filtrarSalvos('foto')">Vistorias</button>
+                                <button class="filter-btn" data-filter="video"
+                                    onclick="filtrarSalvos('video')">Vídeos</button>
+                                <button class="filter-btn" data-filter="transcricao"
+                                    onclick="filtrarSalvos('transcricao')">Transcrições</button>
+                            </div>
+                            <div class="saved-files-list" id="savedFilesList">
+                                <div class="saved-files-empty">
+                                    <i data-lucide="folder-x"></i>
+                                    <p>Nenhum documento salvo ainda.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card result-card">
+                            <div class="result-header">
+                                <h3 id="salvoViewerTitle">Visualização do Documento</h3>
+                                <button onclick="toggleEditSalvo()" class="btn-icon hidden" title="Editar"
+                                    id="btnEditSalvo">
+                                    <i data-lucide="edit-3"></i>
+                                </button>
+                            </div>
+                            <div id="salvoEmptyState" class="empty-state">
+                                <i data-lucide="file-text"></i>
+                                <p>Selecione um documento para visualizar.</p>
+                            </div>
+                            <div id="salvoViewContainer" class="result-container hidden">
+                                <div id="salvoViewArea">
+                                    <div id="salvoViewContent" class="markdown-body"></div>
+                                </div>
+                                <div id="salvoEditArea" class="edit-area hidden">
+                                    <div id="salvoEditableContent" class="editable-content markdown-body"
+                                        contenteditable="true"></div>
+                                    <div class="edit-actions-inline">
+                                        <button onclick="salvarEdicaoSalvo()" class="btn-success btn-sm"><i
+                                                data-lucide="check"></i> Salvar</button>
+                                        <button onclick="cancelarEdicaoSalvo()" class="btn-secondary btn-sm"><i
+                                                data-lucide="x"></i> Cancelar</button>
+                                        <div class="result-actions" id="actionsSalvo">
+                                            <button onclick="copiarTextoSalvo()" class="btn-secondary btn-sm"><i
+                                                    data-lucide="copy"></i> Copiar</button>
+                                            <button onclick="exportarSalvoAtual()" class="btn-secondary btn-sm"><i
+                                                    data-lucide="file-text"></i> PDF</button>
+                                            <button onclick="fecharVisualizacaoSalvo()" class="btn-secondary btn-sm"><i
+                                                    data-lucide="x"></i> Fechar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                </section>
+
+            </div>
+
+
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modalTranscricao" class="modal-overlay hidden" onclick="fecharModal(event)">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i data-lucide="file-text"></i> Visualização</h2>
+                <button class="btn-icon" onclick="fecharTranscricao()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="outputTranscricao" class="markdown-body"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="fecharTranscricao()" class="btn-secondary"><i data-lucide="x"></i> Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Login Dashboard -->
+    <div id="modalLoginDash" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Acesso ao Dashboard</h2>
+                <button class="btn-icon" onclick="fecharModalDash()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px;">Digite suas credenciais para acessar o Dashboard de KPIs.</p>
+                <div class="form-group">
+                    <input type="text" id="dashUser" placeholder="Usuário" class="form-input"
+                        style="width: 100%; margin-bottom: 10px;">
+                    <input type="password" id="dashPass" placeholder="Senha" class="form-input"
+                        style="width: 100%; margin-bottom: 20px;">
+                </div>
+                <div class="btn-group" style="justify-content: center;">
+                    <button onclick="fecharModalDash()" class="btn-secondary">Cancelar</button>
+                    <button onclick="validarAcessoDash()" class="btn-primary">Acessar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SignalR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <!-- App Scripts -->
+    <script type="module" src="js/app.js?v=61"></script>
+
+    <script>
+        // Auth Check & UI Initialization
+        const auth = localStorage.getItem('sentinel-auth');
+        const user = localStorage.getItem('sentinel-user');
+        const role = localStorage.getItem('sentinel-role');
+
+        if (!auth || auth !== 'true') {
+            window.location.href = 'login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Update User Profile
+            if (user) {
+                document.getElementById('userNameDisplay').textContent = user;
+                document.getElementById('userAvatar').textContent = user.substring(0, 2).toUpperCase();
+            }
+            if (role) {
+                document.getElementById('userRole').textContent = role;
+                
+                // Show/Hide Members Area based on role
+                if (['Admin', 'Coordenador', 'Supervisor'].includes(role)) {
+                    const navMembros = document.getElementById('nav-membros');
+                    if (navMembros) {
+                        navMembros.classList.remove('hidden');
+                    }
+                }
+            }
+
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function openMobileMenu() {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileMenu() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (sidebar.classList.contains('open')) {
+                        closeMobileMenu();
+                    } else {
+                        openMobileMenu();
+                    }
+                });
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', closeMobileMenu);
+            }
+
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(function (item) {
+                item.addEventListener('click', function () {
+                    if (window.innerWidth <= 700) {
+                        closeMobileMenu();
+                    }
+                });
+            });
+
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 700) {
+                    closeMobileMenu();
+                }
+            });
+
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+        });
+
+        function logout() {
+            localStorage.removeItem('sentinel-auth');
+            localStorage.removeItem('sentinel-user');
+            localStorage.removeItem('sentinel-role');
+            window.location.href = 'login.html';
+        }
+
+        function abrirModalDash() {
+            document.getElementById('modalLoginDash').classList.remove('hidden');
+            document.getElementById('dashUser').focus();
+        }
+
+        function fecharModalDash() {
+            document.getElementById('modalLoginDash').classList.add('hidden');
+            document.getElementById('dashUser').value = '';
+            document.getElementById('dashPass').value = '';
+        }
+
+        async function validarAcessoDash() {
+            const user = document.getElementById('dashUser').value.trim();
+            const pass = document.getElementById('dashPass').value;
+            const btn = document.querySelector('#modalLoginDash .btn-primary');
+
+            if (!user || !pass) {
+                alert('Informe usuário e senha!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = 'VALIDANDO...';
+
+            try {
+                // We check credentials against our local API first to be safe
+                const authResponse = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+
+                const authResult = await authResponse.json();
+
+                if (authResult.success) {
+                    const user_role = authResult.role;
+                    const ALLOWED_ROLES = ['Admin', 'Coordenador', 'Supervisor', 'Analista'];
+
+                    if (ALLOWED_ROLES.includes(user_role)) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        // Use relative path for dashboard or the cloud URL as before
+                        // form.action = 'http://localhost:8051/login'; // Local for dev
+                        form.action = 'https://sinistroia-dashboard-557004456190.us-central1.run.app/login';
+                        form.target = '_blank';
+
+                        const inputUser = document.createElement('input');
+                        inputUser.type = 'hidden';
+                        inputUser.name = 'username';
+                        inputUser.value = user;
+
+                        const inputPass = document.createElement('input');
+                        inputPass.type = 'hidden';
+                        inputPass.name = 'password';
+                        inputPass.value = pass;
+
+                        form.appendChild(inputUser);
+                        form.appendChild(inputPass);
+                        document.body.appendChild(form);
+                        form.submit();
+                        document.body.removeChild(form);
+                        fecharModalDash();
+                    } else {
+                        alert(`Acesso Negado: O perfil ${user_role} não possui permissão para o Dashboard.`);
+                    }
+                } else {
+                    alert('Usuário ou senha incorretos!');
+                }
+            } catch (error) {
+                console.error('Erro na autenticação:', error);
+                alert('Erro de conexão com o servidor de autenticação.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Acessar';
+            }
+        }
+
+        document.getElementById('dashPass').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                validarAcessoDash();
+            }
+        });
+    </script>
+</body>
+
+</html>

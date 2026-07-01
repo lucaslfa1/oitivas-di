@@ -17,7 +17,7 @@ backup/
 sentinel_cortex_logs.txt
 
 # Uploads e mídia gerada em runtime
-Backend/wwwroot/uploads/
+services/api/wwwroot/uploads/
 *.wav
 *.mp3
 *.mp4
@@ -29,8 +29,19 @@ Backend/wwwroot/uploads/
 .vs/
 .vscode/
 
-# Logs
+# Logs e dumps de runtime (evita reincidência da poluição da raiz)
 *.log
+*_logs.txt
+fresh_*.txt
+backend_logs.txt
+report.txt
+dotnet-test-output.txt
+postgres_search.txt
+build_errors.txt
+build_output.txt
+payload_output.json
+merged_python.json
+models_full.json
 
 # Database
 *.db

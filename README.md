@@ -1,127 +1,115 @@
-# Sentinel - Sistema de Análise Forense de Sinistros Veiculares
+# Sentinel — Sistema de Análise Forense de Sinistros
 
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-purple.svg)](https://dotnet.microsoft.com/)
-[![Google Cloud](https://img.shields.io/badge/Google%20Cloud-Run-4285F4.svg)](https://cloud.google.com/)
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB.svg)](https://www.python.org/)
+[![Azure](https://img.shields.io/badge/Azure-OpenAI%20%7C%20Speech-0078D4.svg)](https://azure.microsoft.com/)
 
-## Descrição
+Sistema de análise forense de sinistros veiculares com IA (Azure):
 
-Sistema especializado em análise forense de sinistros veiculares utilizando Inteligência Artificial para:
+- **Transcrição de Oitivas** — áudios de ligações (Operador BAS ↔ Motorista) em texto estruturado, com diarização.
+- **Análise de Imagens e Vídeos** — danos em veículos, dashcams e depoimentos.
+- **Geração de Laudos** — relatórios técnicos periciais automatizados.
+- **Detecção de Inconsistências** — apoio à identificação de fraudes.
 
-- **Transcrição de Oitivas** - Converte áudios de ligações (Operador BAS ↔ Motorista) em texto estruturado
-- **Análise de Imagens** - Avalia danos em veículos através de fotografias
-- **Análise de Vídeos** - Processa dashcams, câmeras de segurança e depoimentos em vídeo
-- **Geração de Laudos** - Produz relatórios técnicos periciais automatizados
-- **Detecção de Fraudes** - Identifica inconsistências e padrões suspeitos
+> **IA = Azure-only:** Azure Speech-to-Text + Azure OpenAI (GPT-4o / Whisper) + Azure Text Analytics. Versões antigas usavam Google Gemini/Vertex — removidas.
 
 ## Arquitetura
 
+Monorepo com 3 aplicações deployáveis:
+
 ```
-Sentinel/
-├── Backend/                    # API .NET 8
-│   ├── Services/              # Serviços de IA
-│   │   ├── GeminiTranscricaoService.cs   # Transcrição de áudio
-│   │   ├── GeminiFileApiService.cs       # Upload de arquivos grandes
-│   │   ├── ImagemAnaliseService.cs       # Análise de imagens
-│   │   ├── VideoAnaliseService.cs        # Análise de vídeos
-│   │   ├── DescricaoAnaliseService.cs    # Geração de laudos
-│   │   └── VertexAIService.cs            # Integração Vertex AI (futuro)
-│   ├── Configuration/         # Configurações da aplicação
-│   ├── Models/                # DTOs e entidades
-│   └── Data/                  # Contexto do banco (SQLite)
-│
-└── Frontend/                   # Interface Web (wwwroot/)
-    ├── js/                    # JavaScript modular
-    │   ├── api/               # Comunicação com API
-    │   ├── features/          # Funcionalidades
-    │   └── ui/                # Componentes de interface
-    └── css/                   # CSS modular
+oitiva-di-refatorada/
+├─ services/
+│  ├─ api/         # API principal — ASP.NET Core 8 (SinistroAPI) + SPA (wwwroot) + EF Core/SQLite + SignalR
+│  ├─ cortex/      # Microsserviço Python/FastAPI (sentinel-cortex): pré-processamento de mídia (ffmpeg, keyframes)
+│  └─ dashboard/   # Dashboard de KPIs — Python/Dash (Flask + gunicorn)
+├─ deploy/         # Scripts de deploy (Cloud Run) e provisionamento GCP
+├─ scripts/tools/  # Utilitários
+└─ docs/           # Arquitetura, documentação ISO e plano de melhoria
 ```
 
+Fluxo: a **api** recebe a mídia, delega o pré-processamento ao **cortex**, transcreve via Azure Speech/Whisper, gera laudos via Azure OpenAI (GPT-4o) e persiste em SQLite. O **dashboard** consome métricas e autentica contra a api.
 
-## 🚀 Tecnologias
+## Tecnologias
 
-### Backend
-- **.NET 8** - Framework principal
-- **Entity Framework Core** - ORM com SQLite
-- **Google Gemini API** - IA generativa multimodal (transcrição, análise de imagem/vídeo, geração de laudos)
+| Camada | Stack |
+|---|---|
+| API | .NET 8, ASP.NET Core, EF Core (SQLite), SignalR, Swagger |
+| Cortex | Python 3.11, FastAPI, pydub/ffmpeg, OpenCV |
+| Dashboard | Python 3.9, Dash/Plotly, Flask, gunicorn |
+| Frontend | HTML/CSS/JS vanilla (ES Modules), servido pela api |
+| IA | Azure Speech-to-Text, Azure OpenAI (GPT-4o/Whisper), Azure Text Analytics |
+| Infra | Docker, Google Cloud Run |
 
-### Frontend
-- **HTML5/CSS3/JavaScript** - Stack vanilla
-- **Marked.js** - Renderização de Markdown
-- **html2pdf.js** - Exportação de PDFs
-- **Design responsivo** - Mobile-first
+## Configuração (segredos)
 
-### Infraestrutura
-- **Google Cloud Run** - Hospedagem (containerizado)
-- **Google Container Registry** - Registry de imagens Docker
-- **SQLite** - Banco de dados
+Nenhuma chave é versionada. Configure as chaves Azure por ambiente:
 
-## 📡 Endpoints da API
+- **Dev (api):** crie `services/api/appsettings.Local.json` (já no `.gitignore`) com as chaves.
+- **Prod / contêiner:** injete via variáveis de ambiente / Secret Manager.
+- Veja **`.env.example`** (na raiz) para a lista completa: chaves Azure, `DB_PATH`, `MediaProcessor__BaseUrl`, `BACKEND_AUTH_URL`, etc.
+
+## Executando localmente
+
+Com Docker (sobe os 3 serviços):
+
+```bash
+docker compose up --build
+```
+
+Ou individualmente (ordem recomendada: **cortex → api → dashboard**):
+
+```bash
+# Cortex (FastAPI)  -> http://localhost:8000
+cd services/cortex && pip install -r requirements.txt && uvicorn main:app --reload
+
+# API (.NET)        -> http://localhost:5252
+cd services/api && dotnet run
+
+# Dashboard (Dash)  -> http://localhost:8051
+cd services/dashboard && pip install -r requirements.txt && gunicorn app_dashboard:server
+```
+
+## Endpoints principais da API
 
 | Endpoint | Método | Descrição |
-|----------|--------|-----------|
-| `/api/transcrever` | POST | Transcrição de áudio (Gemini) |
-| `/api/analisar/imagem` | POST | Análise de imagens |
+|---|---|---|
+| `/api/transcrever` | POST | Transcrição de áudio (Azure Speech/Whisper) |
+| `/api/analisar/imagem` | POST | Análise de imagens (GPT-4o Vision) |
 | `/api/analisar/video` | POST | Análise de vídeos |
 | `/api/analisar/oitiva` | POST | Análise de oitiva |
 | `/api/analisar/laudo` | POST | Gerar laudo técnico pericial |
-| `/api/salvar` | POST | Salvar análise no banco |
 | `/api/analises` | GET | Listar análises salvas |
-| `/api/analises/{id}` | GET/DELETE | Buscar/deletar análise |
 | `/api/health` | GET | Health check |
 
-## 🚀 Deploy
+## Deploy (Google Cloud Run)
 
-### Google Cloud Run
+Pelos scripts em `deploy/` (ancorados na raiz do repositório):
 
-```bash
-# Build da imagem
-gcloud builds submit --tag gcr.io/PROJECT_ID/sinistro-api:latest
-
-# Deploy
-gcloud run deploy sinistro-api \
-  --image gcr.io/PROJECT_ID/sinistro-api:latest \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars "GEMINI_API_KEY=SUA_CHAVE,DB_PATH=/data/sinistros.db" \
-  --memory 1Gi \
-  --timeout 600
+```powershell
+./deploy/deploy.ps1                 # produção (sentinel-nstech)
+./deploy/deploy_test.ps1            # sandbox (sentinel-nstech-test)
+./deploy/deploy.ps1 -DeployCortex   # inclui o microsserviço cortex
 ```
 
-### Local
+As chaves Azure devem ser injetadas no Cloud Run via `--set-env-vars` ou na configuração do serviço (ver `.env.example`).
 
-```bash
-cd Backend
-dotnet run
-# Acesse http://localhost:5252
-```
+**URL de produção:** https://sentinel-nstech-557004456190.us-central1.run.app
 
 ## Regras Anti-Alucinação
 
-O sistema implementa proteções rigorosas contra alucinações de IA:
+1. **Fatos apenas** — só informações explícitas na entrada.
+2. **Sem suposições** — "Não informado" para dados ausentes.
+3. **Neutralidade** — não acusa sem evidência.
+4. **Confiança explícita** — indica nível de certeza (Alto/Médio/Baixo).
 
-1. **Fatos apenas** - Apenas informações explícitas na entrada
-2. **Sem suposições** - "Não informado" para dados ausentes
-3. **Neutralidade** - Não acusa sem evidência
-4. **Confiança explícita** - Indica nível de certeza (Alto/Médio/Baixo)
+## Documentação
 
-## Segurança
-
-- CORS configurado por ambiente
-- API keys em variáveis de ambiente (não no código)
-- Validação de entrada
-- Logs estruturados
-
-## URL de Produção
-
-**Cloud Run:** https://sinistro-api-557004456190.us-central1.run.app
+- `docs/PLANO_MELHORIA_HANDOFF.md` — plano de refatoração e itens pendentes.
+- `docs/ARQUITETURA.md`, `docs/doc-iso/` — arquitetura e documentação de qualidade.
 
 ## Autor
 
-**Lucas Felipe** - lucas.lfa.sc@gmail.com
+**Lucas Felipe** — lucas.lfa.sc@gmail.com
 
----
-
-*Desenvolvido para Opentech/nstech*
-
+*Desenvolvido para Opentech/nstech.*

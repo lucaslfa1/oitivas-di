@@ -20,8 +20,8 @@ Documento consolidado gerado a partir de `docs/doc-iso`.
 | Documento | Documentacao ISO 9001 do Projeto Sentinel |
 | Pasta | `docs/doc-iso` |
 | Sistema | Sentinel - Analise forense de sinistros veiculares |
-| Repositorio | `https://github.com/lucaslfa1/oitivas-di` |
-| Base inspecionada | Branch `main`, commit `cd4e0e5` |
+| Repositorio | `https://github.com/lucaslfa1/oitiva-di-refatorada` |
+| Base inspecionada | Branch `main` |
 | Data de elaboracao | 2026-05-18 |
 | Responsavel tecnico | Equipe do projeto Sentinel |
 | Status | Documento tecnico auditavel, pendente de aprovacao formal |
@@ -856,7 +856,7 @@ Enquanto as acoes definitivas nao forem concluidas:
 | Data | 2026-05-18 |
 | Workspace | `D:\sentinel-open` |
 | Branch | `main` |
-| Commit | `cd4e0e5` |
+| Commit | - |
 | Sistema operacional | Windows |
 | Shell usado | `cmd.exe` |
 

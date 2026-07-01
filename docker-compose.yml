@@ -4,7 +4,7 @@ services:
   # Backend .NET (Sentinel)
   backend:
     build:
-      context: ./Backend
+      context: ./services/api
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
@@ -19,7 +19,7 @@ services:
   # Sentinel Cortex (Python Media Processor)
   sentinel-cortex:
     build:
-      context: ./sentinel-cortex
+      context: ./services/cortex
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
@@ -31,7 +31,7 @@ services:
   # Dashboard Python (KPIs)
   dashboard:
     build:
-      context: ./dashboard-kpi
+      context: ./services/dashboard
       dockerfile: Dockerfile
     ports:
       - "8051:8051"

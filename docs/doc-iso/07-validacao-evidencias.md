@@ -7,7 +7,7 @@
 | Data | 2026-05-18 |
 | Workspace | `D:\sentinel-open` |
 | Branch | `main` |
-| Commit | `cd4e0e5` |
+| Commit | - |
 | Sistema operacional | Windows |
 | Shell usado | `cmd.exe` |
 
